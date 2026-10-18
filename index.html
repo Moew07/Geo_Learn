@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Геодезия: Интерактивный Про-Курс</title>
+<link rel="icon" href="cat.png" type="image/png">
+<meta name="theme-color" content="#84A282">
+<style>
+:root {
+  --pink: #F6E2E9;
+  --cream: #FEFAF3;
+  --green-light: #B8CFB3;
+  --green: #84A282;
+  --green-dark: #5d7a5b;
+  --text: #2c3e50;
+  --text-light: #546e7a;
+  --shadow: rgba(132,162,130,0.15);
+  --white: #ffffff;
+  --accent: #ffb300;
+}
+
+[data-theme="dark"] {
+  --pink: #2c3e50;
+  --cream: #1a2328;
+  --green-light: #6a9a65;
+  --green: #84A282;
+  --green-dark: #a8c4a6;
+  --text: #eceff1;
+  --text-light: #b0bec5;
+  --shadow: rgba(0,0,0,0.4);
+  --white: #263238;
+}
+
+[data-theme="blue"] {
+  --pink: #dfe6e9;
+  --cream: #f0f3f5;
+  --green-light: #74b9ff;
+  --green: #0984e3;
+  --green-dark: #06528f;
+  --text: #2d3436;
+  --text-light: #636e72;
+  --shadow: rgba(9,132,227,0.2);
+}
+
+[data-theme="purple"] {
+  --pink: #f3e5f5;
+  --cream: #faf3ff;
+  --green-light: #c9a8ff;
+  --green: #9b59b6;
+  --green-dark: #6c3483;
+  --text: #2d3436;
+  --text-light: #636e72;
+  --shadow: rgba(155,89,182,0.2);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s, color 0.2s, transform 0.2s; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, var(--cream) 0%, var(--pink) 100%);
+  min-height: 100vh;
+  color: var(--text);
+  overflow-x: hidden;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+
+.bg-bubbles {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none; z-index: 0; overflow: hidden;
+}
+
+.bubble {
+  position: absolute; border-radius: 50%;
+  background: rgba(184,207,179,0.1);
+  animation: float 25s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+  50% { transform: translateY(-80px) translateX(40px) scale(1.05); }
+}
+
+.navbar {
+  background: rgba(254,250,243,0.9);
+  backdrop-filter: blur(15px);
+  padding: 12px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 100;
+  border-bottom: 1px solid var(--green-light);
+  box-shadow: 0 4px 20px var(--shadow);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+[data-theme="dark"] .navbar { background: rgba(26,35,40,0.95); }
+
+.navbar .logo {
+  font-size: 1.2em; font-weight: 800; color: var(--green-dark);
+  display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+
+.nav-links { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; }
+
+.nav-btn {
+  background: transparent; border: 2px solid var(--green-light);
+  color: var(--text); padding: 8px 14px; border-radius: 25px;
+  cursor: pointer; font-size: 0.85em; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+.nav-btn:hover, .theme-btn:hover { background: var(--green-light); color: var(--white); transform: translateY(-2px); }
+.nav-btn.active { background: var(--green); color: white; border-color: var(--green); box-shadow: 0 4px 12px var(--shadow); }
+
+.lang-select, .theme-btn {
+  padding: 8px 12px; border-radius: 20px; border: 2px solid var(--green-light);
+  background: var(--white); color: var(--text); font-size: 0.85em; cursor: pointer;
+  max-width: 100px;
+}
+
+.page { display: none; padding: 25px 15px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+.page.active { display: block; animation: fadeInUp 0.5s ease; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.profile-container {
+  max-width: 900px; margin: 20px auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 25px;
+}
+@media (max-width: 768px) { 
+  .profile-container { grid-template-columns: 1fr; gap: 20px; }
+  .page { padding: 20px 12px; }
+  .navbar { padding: 10px 12px; }
+  .navbar .logo { font-size: 1.1em; }
+}
+
+.profile-card, .settings-card {
+  background: var(--white); border-radius: 24px; padding: 25px 20px;
+  border: 1px solid var(--green-light); box-shadow: 0 10px 40px var(--shadow);
+}
+@media (max-width: 480px) {
+  .profile-card, .settings-card { padding: 20px 15px; border-radius: 18px; }
+}
+
+.profile-avatar-container {
+  position: relative; width: 120px; height: 120px;
+  margin: 0 auto 20px; cursor: pointer; transition: transform 0.3s;
+}
+@media (max-width: 480px) {
+  .profile-avatar-container { width: 100px; height: 100px; }
+}
+.profile-avatar-container:hover { transform: scale(1.05); }
+.profile-avatar {
+  width: 100%; height: 100%; border-radius: 50%;
+  background: linear-gradient(135deg, var(--green-light), var(--green));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3em; overflow: hidden; border: 4px solid var(--white);
+  box-shadow: 0 5px 20px var(--shadow);
+}
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-upload-hint {
+  position: absolute; bottom: 5px; right: 5px;
+  background: var(--green); color: white;
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1em; border: 3px solid var(--white);
+}
+
+.profile-card h2 { color: var(--green-dark); margin-bottom: 10px; font-size: 1.4em; text-align: center; }
+.profile-card input {
+  width: 100%; padding: 12px 16px; border-radius: 12px;
+  border: 2px solid var(--pink); background: var(--cream);
+  color: var(--text); font-size: 1em; margin: 10px 0; text-align: center;
+}
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 25px; }
+.stat-box {
+  background: linear-gradient(135deg, var(--pink), var(--white));
+  padding: 12px 8px; border-radius: 14px; border: 2px solid var(--green-light); text-align: center;
+}
+.stat-box .number { font-size: 1.5em; font-weight: 800; color: var(--green-dark); }
+.stat-box .label { font-size: 0.75em; color: var(--text-light); margin-top: 4px; }
+@media (max-width: 480px) {
+  .stat-box .number { font-size: 1.3em; }
+  .stat-box .label { font-size: 0.7em; }
+}
+
+.settings-card h3 { color: var(--green-dark); margin-bottom: 20px; font-size: 1.2em; display: flex; align-items: center; gap: 8px; }
+.setting-item { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--pink); }
+.setting-item:last-child { border-bottom: none; }
+.setting-label { display: block; margin-bottom: 10px; font-weight: 600; color: var(--text); font-size: 0.95em; }
+
+.theme-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+@media (max-width: 480px) { .theme-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+.theme-option {
+  padding: 10px 8px; border-radius: 12px; border: 3px solid transparent;
+  cursor: pointer; text-align: center; font-size: 0.8em; font-weight: 600; transition: all 0.3s;
+  word-break: break-word;
+}
+.theme-option:hover { transform: translateY(-3px); }
+.theme-option.active { border-color: var(--green-dark); box-shadow: 0 0 0 3px var(--green-light); }
+.theme-pink { background: linear-gradient(135deg, #F6E2E9, #FEFAF3); color: #3d3d3d; }
+.theme-dark { background: linear-gradient(135deg, #2d3436, #1e272e); color: #f5f6fa; }
+.theme-blue { background: linear-gradient(135deg, #dfe6e9, #74b9ff); color: #2d3436; }
+.theme-purple { background: linear-gradient(135deg, #f3e5f5, #c9a8ff); color: #2d3436; }
+
+.learn-header { text-align: center; margin-bottom: 25px; }
+.learn-header h2 { font-size: 1.8em; color: var(--green-dark); margin-bottom: 10px; font-weight: 800; }
+.learn-header p { color: var(--text-light); font-size: 1em; max-width: 600px; margin: 0 auto; }
+@media (max-width: 480px) {
+  .learn-header h2 { font-size: 1.5em; }
+  .learn-header p { font-size: 0.9em; }
+}
+
+.progress-container { max-width: 600px; margin: 0 auto 25px; background: var(--white); padding: 18px; border-radius: 16px; box-shadow: 0 4px 15px var(--shadow); }
+.progress-bar { width: 100%; height: 14px; background: var(--pink); border-radius: 7px; overflow: hidden; }
+.progress-bar .fill { height: 100%; background: linear-gradient(90deg, var(--green-light), var(--green)); border-radius: 7px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+.progress-text { text-align: center; margin-top: 10px; color: var(--text-light); font-weight: 600; font-size: 0.9em; }
+
+.sections-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+@media (max-width: 480px) { .sections-grid { grid-template-columns: 1fr; gap: 15px; } }
+
+.section-card {
+  background: var(--white); border-radius: 20px; padding: 25px 20px;
+  border: 2px solid transparent; cursor: pointer; 
+  box-shadow: 0 8px 30px var(--shadow); position: relative; overflow: hidden;
+}
+.section-card::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+  background: linear-gradient(90deg, var(--green-light), var(--green));
+}
+.section-card:hover:not(.locked) { transform: translateY(-8px); border-color: var(--green); box-shadow: 0 15px 40px var(--shadow); }
+.section-card.locked { opacity: 0.6; cursor: not-allowed; filter: grayscale(0.8); }
+.section-card.completed { border-color: var(--green); background: linear-gradient(135deg, rgba(132,162,130,0.05), var(--white)); }
+
+.section-card .icon { font-size: 3em; margin-bottom: 12px; display: block; }
+.section-card h3 { font-size: 1.2em; color: var(--green-dark); margin-bottom: 8px; font-weight: 700; }
+.section-card p { color: var(--text-light); font-size: 0.9em; line-height: 1.5; margin-bottom: 12px; }
+.section-meta { display: flex; gap: 12px; font-size: 0.8em; color: var(--text-light); font-weight: 600; flex-wrap: wrap; }
+.section-meta span { display: flex; align-items: center; gap: 5px; }
+
+.section-card .badge {
+  position: absolute; top: 15px; right: 15px;
+  background: var(--green); color: white; padding: 5px 12px;
+  border-radius: 20px; font-size: 0.75em; font-weight: 700;
+  box-shadow: 0 4px 10px rgba(132,162,130,0.3);
+}
+.section-card .lock-icon { position: absolute; top: 15px; right: 15px; font-size: 1.5em; opacity: 0.5; }
+
+.final-quiz-card {
+  background: linear-gradient(135deg, #ffd54f, #ffb300);
+  border-radius: 20px; padding: 25px 20px; border: 3px solid #ff8f00;
+  cursor: pointer; transition: all 0.3s; text-align: center;
+  box-shadow: 0 10px 30px rgba(255,179,0,0.3); animation: pulse-glow 2s infinite; grid-column: 1 / -1;
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 10px 30px rgba(255,179,0,0.3); }
+  50% { box-shadow: 0 10px 40px rgba(255,179,0,0.5); }
+}
+.final-quiz-card:hover { transform: translateY(-5px) scale(1.02); }
+.final-quiz-card .icon { font-size: 2.5em; margin-bottom: 10px; display: block; }
+.final-quiz-card h3 { font-size: 1.2em; color: #fff; margin-bottom: 6px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+.final-quiz-card p { color: rgba(255,255,255,0.95); font-size: 0.9em; }
+
+.lesson-viewer {
+  display: grid; grid-template-columns: 260px 1fr; gap: 25px;
+  background: var(--white); border-radius: 24px; overflow: hidden;
+  box-shadow: 0 10px 40px var(--shadow); min-height: 550px;
+}
+@media (max-width: 900px) {
+  .lesson-viewer { grid-template-columns: 1fr; min-height: auto; }
+  .lesson-sidebar { 
+    flex-direction: row; overflow-x: auto; padding: 12px; 
+    border-right: none; border-bottom: 1px solid var(--green-light);
+    -webkit-overflow-scrolling: touch;
+  }
+  .lesson-nav-item { white-space: nowrap; padding: 10px 14px; font-size: 0.85em; flex-shrink: 0; }
+  .lesson-content-area { padding: 20px 15px; max-height: none; }
+}
+@media (max-width: 480px) {
+  .lesson-viewer { border-radius: 18px; }
+  .lesson-sidebar { padding: 10px; gap: 8px; }
+  .lesson-nav-item { padding: 8px 12px; font-size: 0.8em; }
+}
+
+.lesson-sidebar {
+  background: rgba(132,162,130,0.05); padding: 20px;
+  border-right: 1px solid var(--green-light);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.lesson-nav-item {
+  padding: 12px 16px; border-radius: 12px; cursor: pointer;
+  font-weight: 600; font-size: 0.9em; color: var(--text-light);
+  display: flex; align-items: center; gap: 10px; transition: all 0.2s; border: 2px solid transparent;
+}
+.lesson-nav-item:hover { background: var(--white); color: var(--green-dark); }
+.lesson-nav-item.active { background: var(--white); color: var(--green-dark); border-color: var(--green); box-shadow: 0 4px 12px var(--shadow); }
+.lesson-nav-item.completed { color: var(--green); }
+.lesson-nav-item .check { opacity: 0; transition: opacity 0.3s; flex-shrink: 0; }
+.lesson-nav-item.completed .check { opacity: 1; }
+
+.lesson-content-area { padding: 35px 30px; overflow-y: auto; max-height: 75vh; }
+@media (max-width: 480px) { .lesson-content-area { padding: 20px 15px; } }
+.lesson-content-area h2 { font-size: 1.6em; color: var(--green-dark); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 3px solid var(--pink); }
+@media (max-width: 480px) { .lesson-content-area h2 { font-size: 1.3em; } }
+
+.info-block {
+  background: var(--cream); padding: 20px; border-radius: 16px;
+  margin-bottom: 20px; border-left: 5px solid var(--green);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+@media (max-width: 480px) { .info-block { padding: 15px; } }
+.info-block h4 { color: var(--green-dark); margin-bottom: 10px; font-size: 1.1em; display: flex; align-items: center; gap: 8px; }
+.info-block p { margin-bottom: 10px; color: var(--text); line-height: 1.6; font-size: 0.95em; }
+.info-block ul, .info-block ol { padding-left: 22px; margin-bottom: 12px; }
+.info-block li { margin-bottom: 6px; line-height: 1.5; color: var(--text); font-size: 0.95em; }
+
+.fact-box {
+  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+  padding: 18px; border-radius: 16px; margin-top: 20px;
+  border: 2px solid #ffb74d; color: #e65100;
+}
+[data-theme="dark"] .fact-box { background: linear-gradient(135deg, #3e2723, #4e342e); color: #ffcc80; border-color: #ff9800; }
+.fact-box h4 { margin-bottom: 6px; font-size: 1em; }
+.fact-box p { font-size: 0.9em; line-height: 1.5; }
+
+.lesson-actions {
+  margin-top: 30px; padding-top: 25px; border-top: 2px solid var(--pink);
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+}
+@media (max-width: 480px) { .lesson-actions { flex-direction: column; } }
+
+.lobby-container {
+  max-width: 700px; margin: 20px auto;
+  background: var(--white); border-radius: 20px;
+  padding: 25px 20px; border: 1px solid var(--green-light);
+  box-shadow: 0 10px 40px var(--shadow);
+}
+@media (max-width: 480px) { .lobby-container { padding: 20px 15px; border-radius: 18px; } }
+.lobby-header { text-align: center; margin-bottom: 20px; }
+.lobby-header h2 { font-size: 1.5em; color: var(--green-dark); margin-bottom: 6px; }
+.lobby-header p { font-size: 0.9em; color: var(--text-light); }
+
+.player-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; margin: 18px 0; }
+@media (max-width: 480px) { .player-slots { grid-template-columns: 1fr; } }
+.player-slot {
+  background: var(--white); border: 2px solid var(--pink);
+  border-radius: 14px; padding: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.player-slot.filled { border-color: var(--green); background: linear-gradient(135deg, rgba(132,162,130,0.1), var(--white)); }
+.player-slot.empty { border-style: dashed; background: rgba(184,207,179,0.1); justify-content: center; cursor: pointer; }
+
+.slot-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--green-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3em; font-weight: bold; color: white; flex-shrink: 0;
+}
+.slot-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.slot-name-input, .slot-type-select {
+  width: 100%; padding: 6px 10px; border-radius: 8px;
+  border: 2px solid var(--pink); background: var(--cream);
+  color: var(--text); font-size: 0.85em;
+}
+.lobby-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+
+.rules-section {
+  margin-top: 25px; padding: 18px;
+  background: var(--white); border-radius: 16px;
+  border: 1px solid var(--green-light);
+}
+.rules-section h3 { color: var(--green-dark); margin-bottom: 12px; font-size: 1.1em; }
+.rules-section ul { margin-left: 18px; margin-bottom: 8px; color: var(--text); }
+.rules-section li { margin: 5px 0; line-height: 1.5; font-size: 0.9em; }
+
+.game-board-container { display: none; max-width: 100%; margin: 15px auto; }
+.game-board-container.active { display: block; }
+.game-info-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 8px; margin-bottom: 12px; padding: 12px 15px;
+  background: var(--white); border-radius: 14px;
+  border: 1px solid var(--green-light); box-shadow: 0 4px 15px var(--shadow);
+}
+.game-board-wrapper {
+  background: var(--white); border-radius: 20px; padding: 15px;
+  border: 1px solid var(--green-light); margin: 12px 0;
+  box-shadow: 0 4px 15px var(--shadow);
+}
+.game-board { 
+  display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; 
+  position: relative; width: 100%; max-width: 900px; margin: 0 auto;
+}
+@media (max-width: 1024px) { .game-board { grid-template-columns: repeat(7, 1fr); } }
+@media (max-width: 768px) { .game-board { grid-template-columns: repeat(5, 1fr); gap: 3px; } }
+@media (max-width: 480px) { .game-board { grid-template-columns: repeat(5, 1fr); gap: 2px; } }
+
+.cell {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; font-size: 0.7em; font-weight: bold;
+  position: relative; background: var(--white); border: 2px solid var(--pink);
+  min-height: 50px; transition: transform 0.2s;
+}
+@media (max-width: 480px) { .cell { min-height: 42px; font-size: 0.6em; border-radius: 6px; } }
+.cell:hover { transform: scale(1.05); z-index: 2; }
+.cell.start { background: linear-gradient(135deg, var(--green-light), var(--green)); border-color: var(--green); color: white; }
+.cell.finish { background: linear-gradient(135deg, #ffd54f, #ffb300); border-color: #ffb300; color: white; animation: glow 2s infinite; }
+.cell.bonus { background: linear-gradient(135deg, #b3e5fc, #81d4fa); border-color: #4fc3f7; }
+.cell.penalty { background: linear-gradient(135deg, #ffcdd2, #ef9a9a); border-color: #e57373; }
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(255,179,0,0.5); }
+  50% { box-shadow: 0 0 25px rgba(255,179,0,0.8); }
+}
+.cell .cell-number { position: absolute; top: 2px; left: 3px; font-size: 0.6em; opacity: 0.7; }
+.cell .cell-icon { font-size: 1.1em; }
+
+.cell .player-token {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65em; font-weight: bold; position: absolute;
+  border: 3px solid white; z-index: 5; overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (max-width: 480px) { .cell .player-token { width: 26px; height: 26px; font-size: 0.55em; } }
+.cell .player-token img { width: 100%; height: 100%; object-fit: cover; }
+
+.dice-area { text-align: center; margin: 20px 0; }
+.dice {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, var(--white), var(--pink));
+  border-radius: 16px; display: inline-flex;
+  align-items: center; justify-content: center;
+  font-size: 2.5em; color: var(--green-dark); font-weight: bold;
+  cursor: pointer; box-shadow: 0 8px 25px var(--shadow); border: 3px solid var(--green-light);
+  user-select: none; transition: transform 0.3s;
+}
+@media (max-width: 480px) { .dice { width: 65px; height: 65px; font-size: 2em; } }
+.dice:hover:not(.disabled) { transform: scale(1.1); box-shadow: 0 12px 35px var(--shadow); }
+.dice.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+.dice.rolling { animation: diceRoll 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+@keyframes diceRoll {
+  0% { transform: rotate(0deg) scale(1); }
+  20% { transform: rotate(72deg) scale(1.1); }
+  40% { transform: rotate(144deg) scale(1); }
+  60% { transform: rotate(216deg) scale(1.1); }
+  80% { transform: rotate(288deg) scale(1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+.dice-label { margin-top: 10px; color: var(--text-light); font-size: 0.95em; font-weight: 600; }
+
+.players-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 12px; }
+@media (max-width: 480px) { .players-panel { grid-template-columns: 1fr 1fr; } }
+.player-card-game { 
+  background: var(--white); padding: 12px; border-radius: 12px; border: 2px solid var(--pink); transition: all 0.3s;
+}
+.player-card-game.active-turn { border-color: var(--green); box-shadow: 0 0 15px var(--shadow); transform: translateY(-2px); }
+.player-card-game .p-name { font-weight: bold; font-size: 0.9em; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.player-card-game .p-avatar {
+  width: 28px; height: 28px; border-radius: 50%; overflow: hidden;
+  border: 2px solid var(--green); flex-shrink: 0;
+}
+.player-card-game .p-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.player-card-game .p-position { color: var(--text-light); font-size: 0.8em; margin-top: 3px; }
+
+.game-message {
+  text-align: center; padding: 12px; margin: 10px 0;
+  border-radius: 12px; font-weight: 600; display: none; animation: slideIn 0.4s;
+  font-size: 0.95em;
+}
+@keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.game-message.show { display: block; }
+.game-message.success { background: var(--green-light); color: var(--green-dark); }
+.game-message.error { background: #ffcdd2; color: #c62828; }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--green), var(--green-dark));
+  color: white; border: none; padding: 12px 28px; border-radius: 30px;
+  font-size: 1em; font-weight: 700; cursor: pointer;
+  box-shadow: 0 6px 20px rgba(132,162,130,0.4);
+  display: inline-flex; align-items: center; gap: 8px;
+  white-space: nowrap;
+}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(132,162,130,0.5); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+@media (max-width: 480px) { .btn-primary { padding: 10px 22px; font-size: 0.9em; } }
+
+.btn-secondary {
+  background: var(--white); color: var(--text);
+  border: 2px solid var(--green-light); padding: 10px 20px;
+  border-radius: 30px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+  white-space: nowrap;
+}
+.btn-secondary:hover { background: var(--pink); border-color: var(--green); }
+@media (max-width: 480px) { .btn-secondary { padding: 8px 16px; font-size: 0.85em; } }
+
+.modal-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(44,62,80,0.6); backdrop-filter: blur(8px);
+  z-index: 200; justify-content: center; align-items: center; padding: 15px;
+}
+.modal-overlay.active { display: flex; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-content {
+  background: var(--white); border-radius: 24px; padding: 30px 25px;
+  max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2); position: relative;
+}
+@media (max-width: 480px) { .modal-content { padding: 20px 15px; border-radius: 18px; } }
+.close-modal {
+  position: absolute; top: 15px; right: 15px; background: var(--pink);
+  border: none; width: 36px; height: 36px; border-radius: 50%;
+  font-size: 1.3em; cursor: pointer; color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+}
+.close-modal:hover { background: #ffcdd2; color: #c62828; }
+
+.hidden-file-input { display: none; }
+
+.quiz-container { max-width: 800px; margin: 0 auto; }
+.quiz-header { text-align: center; margin-bottom: 25px; }
+.quiz-header h2 { font-size: 1.5em; color: var(--green-dark); }
+@media (max-width: 480px) { .quiz-header h2 { font-size: 1.2em; } }
+.quiz-progress { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: 600; color: var(--text-light); font-size: 0.9em; }
+.quiz-question {
+  font-size: 1.15em; font-weight: 700; color: var(--text);
+  margin-bottom: 20px; line-height: 1.4;
+  background: var(--white); padding: 20px; border-radius: 16px;
+  box-shadow: 0 4px 15px var(--shadow); border: 1px solid var(--pink);
+}
+@media (max-width: 480px) { .quiz-question { font-size: 1em; padding: 15px; } }
+.quiz-options { display: flex; flex-direction: column; gap: 10px; }
+.quiz-option {
+  background: var(--white); border: 2px solid var(--pink);
+  padding: 15px 20px; border-radius: 14px; cursor: pointer;
+  font-size: 0.95em; text-align: left; font-weight: 500;
+  transition: all 0.2s; display: flex; align-items: center; gap: 10px;
+}
+@media (max-width: 480px) { .quiz-option { padding: 12px 15px; font-size: 0.9em; } }
+.quiz-option:hover:not(:disabled) { border-color: var(--green); background: rgba(132,162,130,0.05); transform: translateX(5px); }
+.quiz-option.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+.quiz-option.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+.quiz-option:disabled { cursor: default; opacity: 0.9; }
+
+.quiz-result { text-align: center; padding: 30px 15px; }
+.quiz-result .score-circle {
+  width: 140px; height: 140px; border-radius: 50%;
+  background: conic-gradient(var(--green) calc(var(--percent) * 1%), var(--pink) 0);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px; position: relative;
+}
+@media (max-width: 480px) { .quiz-result .score-circle { width: 120px; height: 120px; } }
+.quiz-result .score-circle::before {
+  content: ''; position: absolute; width: 110px; height: 110px;
+  background: var(--white); border-radius: 50%;
+}
+@media (max-width: 480px) { .quiz-result .score-circle::before { width: 95px; height: 95px; } }
+.quiz-result .score-text { position: relative; z-index: 1; font-size: 1.8em; font-weight: 800; color: var(--green-dark); }
+@media (max-width: 480px) { .quiz-result .score-text { font-size: 1.5em; } }
+
+/* Анимация котика */
+.cat-container {
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 15px;
+  position: relative;
+}
+@media (max-width: 480px) { .cat-container { width: 130px; height: 130px; } }
+
+.cat-svg {
+  width: 100%;
+  height: 100%;
+  animation: catBounce 2s ease-in-out infinite;
+}
+
+@keyframes catBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.cat-paw {
+  animation: pawWave 1.5s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+@keyframes pawWave {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-20deg); }
+  75% { transform: rotate(20deg); }
+}
+
+[data-theme="dark"] .profile-card, [data-theme="dark"] .settings-card, [data-theme="dark"] .lobby-container,
+[data-theme="dark"] .game-board-wrapper, [data-theme="dark"] .game-info-bar, [data-theme="dark"] .player-card-game,
+[data-theme="dark"] .player-slot, [data-theme="dark"] .section-card, [data-theme="dark"] .modal-content,
+[data-theme="dark"] .stat-box, [data-theme="dark"] .cell, [data-theme="dark"] .dice, [data-theme="dark"] .rules-section,
+[data-theme="dark"] .lesson-viewer, [data-theme="dark"] .quiz-question, [data-theme="dark"] .quiz-option {
+  background: #263238 !important; color: #eceff1 !important;
+}
+[data-theme="dark"] .info-block { background: #37474f !important; color: #eceff1 !important; }
+[data-theme="dark"] input, [data-theme="dark"] select { background: #1a2328 !important; color: #eceff1 !important; border-color: #4a6a6f !important; }
+[data-theme="dark"] .navbar { background: rgba(26,35,40,0.95) !important; }
+[data-theme="dark"] .btn-secondary { background: #37474f !important; color: #eceff1 !important; }
+</style>
+</head>
+<body>
+
+<div class="bg-bubbles" id="bg-bubbles"></div>
+
+<nav class="navbar">
+  <div class="logo" data-i18n="logo">Геодезия: Про-Курс</div>
+  <div class="nav-links">
+    <button class="nav-btn" onclick="showPage('profile')" id="nav-profile" data-i18n="nav_profile">Профиль</button>
+    <button class="nav-btn active" onclick="showPage('learn')" id="nav-learn" data-i18n="nav_learn">Обучение</button>
+    <button class="nav-btn" onclick="showPage('lobby')" id="nav-lobby" data-i18n="nav_game">Игра</button>
+    <select class="lang-select" id="lang-select" onchange="changeLanguage(this.value)">
+      <option value="ru">RU</option>
+      <option value="en">EN</option>
+    </select>
+    <button class="theme-btn" onclick="cycleTheme()" title="Сменить тему" data-i18n="theme_btn">Тема</button>
+  </div>
+</nav>
+
+<div class="page" id="page-profile">
+  <div class="profile-container">
+    <div class="profile-card">
+      <div class="profile-avatar-container" onclick="document.getElementById('avatar-upload').click()">
+        <div class="profile-avatar" id="profile-avatar">
+          <span id="avatar-emoji">+</span>
+          <img id="avatar-img" style="display:none" alt="avatar">
+        </div>
+        <div class="avatar-upload-hint">+</div>
+      </div>
+      <input type="file" id="avatar-upload" class="hidden-file-input" accept="image/*" onchange="handleAvatarUpload(event)">
+      
+      <h2 id="profile-greeting" data-i18n="welcome">Добро пожаловать!</h2>
+      <p style="color:var(--text-light); margin: 10px 0; text-align:center;" data-i18n="enter_name">Введите имя, чтобы начать</p>
+      <input type="text" id="profile-name-input" placeholder="Ваше имя..." maxlength="20" data-i18n-placeholder="name_placeholder">
+      <div style="text-align:center;">
+        <button class="btn-primary" id="save-profile-btn" onclick="saveProfile()" style="margin-top:10px;" data-i18n="save_cache">Сохранить в кэш</button>
+      </div>
+      
+      <div class="stats" id="profile-stats" style="display:none;">
+        <div class="stat-box">
+          <div class="number" id="stat-sections">0</div>
+          <div class="label" data-i18n="stat_sections">Разделов</div>
+        </div>
+        <div class="stat-box">
+          <div class="number" id="stat-games">0</div>
+          <div class="label" data-i18n="stat_games">Игр</div>
+        </div>
+        <div class="stat-box">
+          <div class="number" id="stat-correct">0</div>
+          <div class="label" data-i18n="stat_correct">Верных ответов</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <h3 data-i18n="settings">Настройки</h3>
+      <div class="setting-item">
+        <label class="setting-label" data-i18n="theme_label">Тема оформления</label>
+        <div class="theme-grid">
+          <div class="theme-option theme-pink active" onclick="setTheme('default')" data-i18n="theme_pink">Розовая</div>
+          <div class="theme-option theme-dark" onclick="setTheme('dark')" data-i18n="theme_dark">Тёмная</div>
+          <div class="theme-option theme-blue" onclick="setTheme('blue')" data-i18n="theme_blue">Синяя</div>
+          <div class="theme-option theme-purple" onclick="setTheme('purple')" data-i18n="theme_purple">Фиолетовая</div>
+        </div>
+      </div>
+      <div class="setting-item">
+        <label class="setting-label" data-i18n="lang_label">Язык интерфейса</label>
+        <select class="lang-select" onchange="changeLanguage(this.value)" style="width:100%;">
+          <option value="ru">Русский</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <div class="setting-item">
+        <button class="btn-secondary" onclick="resetProgress()" style="width:100%; color:#c62828; border-color:#ffcdd2;" data-i18n="reset_progress">Сбросить весь прогресс</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page active" id="page-learn">
+  <div class="learn-header">
+    <h2 data-i18n="learn_title">Программа обучения</h2>
+    <p data-i18n="learn_desc">Последовательно изучайте разделы, усваивайте теорию и проходите итоговые тесты для закрепления знаний.</p>
+  </div>
+  
+  <div class="progress-container">
+    <div class="progress-bar"><div class="fill" id="learn-progress" style="width:0%"></div></div>
+    <div class="progress-text" id="progress-text" data-i18n="progress_text">Прогресс: 0 из 3 разделов</div>
+  </div>
+  
+  <div class="sections-grid" id="sections-grid"></div>
+</div>
+
+<div class="page" id="page-section-viewer">
+  <button class="btn-secondary" onclick="showPage('learn')" style="margin-bottom: 20px;" data-i18n="back_sections">Назад к разделам</button>
+  <div class="lesson-viewer">
+    <div class="lesson-sidebar" id="lesson-sidebar"></div>
+    <div class="lesson-content-area" id="lesson-content-area"></div>
+  </div>
+</div>
+
+<div class="page" id="page-lobby">
+  <div class="lobby-container">
+    <div class="lobby-header">
+      <h2 data-i18n="create_game">Создание игры</h2>
+      <p data-i18n="setup_players">Настройте игроков — можно играть вдвоём на одном ПК!</p>
+    </div>
+    <h3 style="margin:20px 0 15px; color:var(--green-dark);" data-i18n="players">Игроки:</h3>
+    <div class="player-slots" id="player-slots"></div>
+    <div class="lobby-actions">
+      <button class="btn-secondary" onclick="addPlayerSlot()" data-i18n="add_player">Добавить игрока</button>
+      <button class="btn-primary" onclick="startGameFromLobby()" id="start-lobby-btn" disabled data-i18n="start_game">Начать игру</button>
+    </div>
+    <div class="rules-section">
+      <h3 data-i18n="rules">Правила игры</h3>
+      <ul>
+        <li><strong data-i18n="rule_goal">Цель:</strong> <span data-i18n="rule_goal_desc">Первым добраться до финиша (клетка 50)!</span></li>
+        <li><strong data-i18n="rule_turn">Ход:</strong> <span data-i18n="rule_turn_desc">Ответьте на вопрос по геодезии. При правильном ответе — бросайте кубик.</span></li>
+        <li><strong data-i18n="rule_cells">Клетки:</strong> <span data-i18n="rule_cells_desc">Синяя (бонус) — бросьте кубик ещё раз. Красная (штраф) — откат на 2 клетки.</span></li>
+        <li><strong data-i18n="rule_bots">Боты:</strong> <span data-i18n="rule_bots_desc">Отвечают правильно в 65% случаев.</span></li>
+        <li><strong data-i18n="rule_questions">Вопросы:</strong> <span data-i18n="rule_questions_desc">Берутся только из пройденных вами разделов обучения!</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-game">
+  <div class="game-board-container" id="game-board-container">
+    <div class="game-info-bar">
+      <div style="font-weight:bold; color:var(--green-dark);"><span data-i18n="turn_label">Ход:</span> <span id="current-player-name">—</span></div>
+      <button class="btn-secondary" onclick="quitGame()" data-i18n="exit">Выйти</button>
+    </div>
+    <div class="game-message" id="game-message"></div>
+    <div class="dice-area">
+      <div class="dice disabled" id="dice" onclick="rollDice()">?</div>
+      <div class="dice-label" id="dice-label" data-i18n="answer_first">Сначала ответь на вопрос!</div>
+    </div>
+    <div class="game-board-wrapper">
+      <div class="game-board" id="game-board"></div>
+    </div>
+    <div class="players-panel" id="players-panel"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target === this) closeModal()">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeModal()">X</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ===== ПЕРЕВОДЫ =====
+const i18n = {
+  ru: {
+    logo: "Геодезия: Про-Курс",
+    nav_profile: "Профиль", nav_learn: "Обучение", nav_game: "Игра", theme_btn: "Тема",
+    welcome: "Добро пожаловать!", enter_name: "Введите имя, чтобы начать", name_placeholder: "Ваше имя...",
+    save_cache: "Сохранить в кэш", stat_sections: "Разделов", stat_games: "Игр", stat_correct: "Верных ответов",
+    settings: "Настройки", theme_label: "Тема оформления", lang_label: "Язык интерфейса", reset_progress: "Сбросить весь прогресс",
+    theme_pink: "Розовая", theme_dark: "Тёмная", theme_blue: "Синяя", theme_purple: "Фиолетовая",
+    learn_title: "Программа обучения", learn_desc: "Последовательно изучайте разделы, усваивайте теорию и проходите итоговые тесты для закрепления знаний.",
+    progress_text: "Прогресс: {0} из {1} разделов", back_sections: "Назад к разделам",
+    create_game: "Создание игры", setup_players: "Настройте игроков — можно играть вдвоём на одном ПК!", players: "Игроки:",
+    add_player: "Добавить игрока", start_game: "Начать игру", rules: "Правила игры",
+    rule_goal: "Цель:", rule_goal_desc: "Первым добраться до финиша (клетка 50)!",
+    rule_turn: "Ход:", rule_turn_desc: "Ответьте на вопрос по геодезии. При правильном ответе — бросайте кубик.",
+    rule_cells: "Клетки:", rule_cells_desc: "Синяя (бонус) — бросьте кубик ещё раз. Красная (штраф) — откат на 2 клетки.",
+    rule_bots: "Боты:", rule_bots_desc: "Отвечают правильно в 65% случаев.",
+    rule_questions: "Вопросы:", rule_questions_desc: "Берутся только из пройденных вами разделов обучения!",
+    turn_label: "Ход:", exit: "Выйти", answer_first: "Сначала ответь на вопрос!",
+    need_two_players: "Нужно минимум 2 игрока!", need_section: "Сначала пройди хотя бы один раздел обучения!",
+    game_started: "Игра началась!", roll_dice: "Нажми на кубик!", rolling: "Бросок...", rolled: "Выпало",
+    correct_answer: "ответил правильно!", wrong_answer: "ошибся! Пропуск хода!", bonus: "Бонус! Ещё бросок!",
+    penalty: "Штраф! -2 клетки", roll_again: "Бросай ещё раз!", won: "победил!", quit_confirm: "Выйти из игры?",
+    max_players: "Максимум 6 игроков!", question_for: "Вопрос для", continue: "Продолжить",
+    quiz_correct: "Правильно!", quiz_wrong: "Неверно", section_completed: "Раздел пройден!",
+    take_quiz: "Пройти тест", quiz: "Тест", of: "из", bot: "Бот", human: "Человек",
+    position: "Позиция", add_player_label: "Добавить игрока", player_type_human: "Человек",
+    player_type_bot: "Бот", player_type_label: "Тип:", name_label: "Имя:", player_joined: "Игрок добавлен!",
+    final_quiz_title: "ФИНАЛЬНЫЙ МЕГА-КВИЗ", final_quiz_desc: "Все вопросы из всех разделов в случайном порядке!",
+    start_final_quiz: "Начать финальный квиз!", final_quiz_question: "Вопрос", final_quiz_score: "Очки",
+    final_quiz_complete: "Финальный квиз завершён!", final_quiz_perfect: "Идеально! Ты настоящий геодезист!",
+    final_quiz_great: "Отлично! Ты хорошо знаешь геодезию!", final_quiz_good: "Хорошо! Но есть куда расти!",
+    final_quiz_try_again: "Попробуй ещё раз! Ты справишься!", restart_final_quiz: "Пройти ещё раз",
+    back_to_learn: "Вернуться к обучению", lesson: "Урок",
+    quiz_header: "Тест: {0}", quiz_progress: "Вопрос {0} из {1}", quiz_verno: "Верно: {0}",
+    quiz_result_title: "Тест завершён!", quiz_result_msg_100: "Идеально! Вы превосходно усвоили материал!",
+    quiz_result_msg_80: "Отличный результат! Материал усвоен хорошо.", quiz_result_msg_70: "Хорошо! Раздел зачтен.",
+    quiz_result_msg_fail: "Раздел не зачтен. Рекомендуется перечитать теорию.",
+    quiz_result_text: "Вы ответили правильно на {0} из {1} вопросов.",
+    to_sections: "К разделам", retake_quiz: "Пройти заново", next_section: "Следующий раздел →",
+    prev_lesson: "← Предыдущий урок", next_lesson: "Следующий урок →", go_to_test: "Перейти к итоговому тесту →",
+    final_test_btn: "Итоговый тест раздела", sections_count: "{0} занятий", questions_count: "{0} вопросов",
+    completed_badge: "Пройдено", saved_msg: "Сохранено в кэш!"
+  },
+  en: {
+    logo: "Geodesy: Pro Course",
+    nav_profile: "Profile", nav_learn: "Learning", nav_game: "Game", theme_btn: "Theme",
+    welcome: "Welcome!", enter_name: "Enter your name to begin", name_placeholder: "Your name...",
+    save_cache: "Save to cache", stat_sections: "Sections", stat_games: "Games", stat_correct: "Correct answers",
+    settings: "Settings", theme_label: "Color theme", lang_label: "Interface language", reset_progress: "Reset all progress",
+    theme_pink: "Pink", theme_dark: "Dark", theme_blue: "Blue", theme_purple: "Purple",
+    learn_title: "Learning Program", learn_desc: "Study sections sequentially, master the theory and pass final tests to consolidate knowledge.",
+    progress_text: "Progress: {0} of {1} sections", back_sections: "Back to sections",
+    create_game: "Create Game", setup_players: "Set up players — you can play two on one PC!", players: "Players:",
+    add_player: "Add player", start_game: "Start game", rules: "Game Rules",
+    rule_goal: "Goal:", rule_goal_desc: "Be the first to reach the finish (cell 50)!",
+    rule_turn: "Turn:", rule_turn_desc: "Answer a geodesy question. If correct — roll the dice.",
+    rule_cells: "Cells:", rule_cells_desc: "Blue (bonus) — roll again. Red (penalty) — move back 2 cells.",
+    rule_bots: "Bots:", rule_bots_desc: "Answer correctly 65% of the time.",
+    rule_questions: "Questions:", rule_questions_desc: "Taken only from sections you have completed!",
+    turn_label: "Turn:", exit: "Exit", answer_first: "Answer the question first!",
+    need_two_players: "Need at least 2 players!", need_section: "Complete at least one learning section first!",
+    game_started: "Game started!", roll_dice: "Roll the dice!", rolling: "Rolling...", rolled: "Rolled",
+    correct_answer: "answered correctly!", wrong_answer: "wrong! Skip turn!", bonus: "Bonus! Roll again!",
+    penalty: "Penalty! -2 cells", roll_again: "Roll again!", won: "won!", quit_confirm: "Quit game?",
+    max_players: "Maximum 6 players!", question_for: "Question for", continue: "Continue",
+    quiz_correct: "Correct!", quiz_wrong: "Wrong", section_completed: "Section completed!",
+    take_quiz: "Take Quiz", quiz: "Quiz", of: "of", bot: "Bot", human: "Human",
+    position: "Position", add_player_label: "Add Player", player_type_human: "Human",
+    player_type_bot: "Bot", player_type_label: "Type:", name_label: "Name:", player_joined: "Player added!",
+    final_quiz_title: "FINAL MEGA-QUIZ", final_quiz_desc: "All questions from all sections in random order!",
+    start_final_quiz: "Start Final Quiz!", final_quiz_question: "Question", final_quiz_score: "Score",
+    final_quiz_complete: "Final Quiz Complete!", final_quiz_perfect: "Perfect! You're a true geodesist!",
+    final_quiz_great: "Great! You know geodesy well!", final_quiz_good: "Good! But there's room to grow!",
+    final_quiz_try_again: "Try again! You can do it!", restart_final_quiz: "Retake Quiz",
+    back_to_learn: "Back to Learning", lesson: "Lesson",
+    quiz_header: "Quiz: {0}", quiz_progress: "Question {0} of {1}", quiz_verno: "Correct: {0}",
+    quiz_result_title: "Quiz Complete!", quiz_result_msg_100: "Perfect! You've mastered the material excellently!",
+    quiz_result_msg_80: "Excellent result! Material well understood.", quiz_result_msg_70: "Good! Section passed.",
+    quiz_result_msg_fail: "Section not passed. Review the theory and try again.",
+    quiz_result_text: "You answered {0} out of {1} questions correctly.",
+    to_sections: "To Sections", retake_quiz: "Retake Quiz", next_section: "Next Section →",
+    prev_lesson: "← Previous Lesson", next_lesson: "Next Lesson →", go_to_test: "Go to Final Test →",
+    final_test_btn: "Section Final Test", sections_count: "{0} lessons", questions_count: "{0} questions",
+    completed_badge: "Completed", saved_msg: "Saved to cache!"
+  }
+};
+
+let currentLang = 'ru';
+
+function t(key, ...args) {
+  let str = i18n[currentLang][key] || i18n['ru'][key] || key;
+  args.forEach((arg, i) => { str = str.replace(`{${i}}`, arg); });
+  return str;
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (i18n[currentLang][key]) el.textContent = i18n[currentLang][key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (i18n[currentLang][key]) el.placeholder = i18n[currentLang][key];
+  });
+  // Обновляем динамические элементы
+  updateProfileUI(); renderSections();
+  if (document.getElementById('page-lobby').classList.contains('active')) renderLobby();
+}
+
+function changeLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem('geoProLang', lang);
+  document.documentElement.lang = lang;
+  document.getElementById('lang-select').value = lang;
+  applyTranslations();
+}
+
+// ===== ТЕМЫ =====
+const themes = ['default', 'dark', 'blue', 'purple'];
+let currentTheme = 0;
+function setTheme(themeName) {
+  document.body.setAttribute('data-theme', themeName === 'default' ? '' : themeName);
+  localStorage.setItem('geoProTheme', themeName);
+  document.querySelectorAll('.theme-option').forEach((el, i) => {
+    el.classList.toggle('active', themes[i] === themeName);
+  });
+}
+function cycleTheme() {
+  currentTheme = (currentTheme + 1) % themes.length;
+  setTheme(themes[currentTheme]);
+}
+
+// ===== СОСТОЯНИЕ =====
+let appState = { 
+  profile: { name: '', avatar: null }, 
+  completedLessons: [], 
+  completedSections: [], 
+  quizScores: {},
+  stats: { gamesPlayed: 0, correctAnswers: 0 } 
+};
+let gameState = { players: [], currentPlayerIndex: 0, boardSize: 50, isRolling: false, gameOver: false, canRollDice: false };
+let usedQuestions = new Set();
+const PLAYER_COLORS = ['#e57373', '#64b5f6', '#81c784', '#ffb74d', '#ba68c8', '#4dd0e1'];
+
+let currentSection = null;
+let currentQuiz = null;
+let finalQuizState = { questions: [], currentIndex: 0, score: 0, totalQuestions: 0 };
+
+// ===== ДАННЫЕ ОБУЧЕНИЯ =====
+const sections = [
+  {
+    id: 0, 
+    title: { ru: "Основы геодезии", en: "Fundamentals of Geodesy" }, 
+    icon: "📐", 
+    description: { ru: "Фундаментальные понятия, системы координат, масштабы и виды измерений.", en: "Fundamental concepts, coordinate systems, scales and types of measurements." },
+    lessons: [
+      {
+        title: { ru: "1. Введение в геодезию", en: "1. Introduction to Geodesy" },
+        content: {
+          ru: `
+            <h2>Введение в геодезию</h2>
+            <div class="info-block">
+              <h4>Определение и предмет изучения</h4>
+              <p><strong>Геодезия</strong> (от греч. «ge» — Земля, «daisia» — деление) — это наука об измерениях на земной поверхности для определения формы и размеров Земли, а также для создания карт, планов и цифровых моделей местности.</p>
+              <p>Геодезия решает две главные задачи: <strong>научную</strong> (изучение фигуры Земли, гравитационного поля) и <strong>практическую</strong> (обеспечение измерениями строительства, кадастра, картографии).</p>
+            </div>
+            <div class="info-block">
+              <h4>Основные разделы геодезии</h4>
+              <ul>
+                <li><strong>Высшая геодезия:</strong> изучает форму и размеры Земли, её гравитационное поле, создает государственные геодезические сети.</li>
+                <li><strong>Топография:</strong> наука о подробном изображении земной поверхности на планах и картах (ситуация и рельеф).</li>
+                <li><strong>Инженерная геодезия:</strong> обеспечивает геодезическими работами все стадии строительства (изыскания, проект, строительство, эксплуатация).</li>
+                <li><strong>Фотограмметрия:</strong> создание карт по аэро- и космическим снимкам, использование БПЛА (дронов).</li>
+                <li><strong>Кадастр:</strong> учет недвижимого имущества, определение границ земельных участков.</li>
+              </ul>
+            </div>
+            <div class="fact-box">
+              <h4>Исторический факт</h4>
+              <p>Первые геодезические работы проводились в Древнем Египте для восстановления границ полей после разливов Нила и при строительстве пирамид. Эратосфен Киренский (III век до н.э.) первым довольно точно вычислил радиус Земли!</p>
+            </div>
+          `,
+          en: `
+            <h2>Introduction to Geodesy</h2>
+            <div class="info-block">
+              <h4>Definition and Subject of Study</h4>
+              <p><strong>Geodesy</strong> (from Greek "ge" — Earth, "daisia" — division) is the science of measurements on the Earth's surface to determine the shape and size of the Earth, as well as to create maps, plans and digital terrain models.</p>
+              <p>Geodesy solves two main tasks: <strong>scientific</strong> (studying the figure of the Earth, gravitational field) and <strong>practical</strong> (providing measurements for construction, cadastre, cartography).</p>
+            </div>
+            <div class="info-block">
+              <h4>Main Branches of Geodesy</h4>
+              <ul>
+                <li><strong>Higher Geodesy:</strong> studies the shape and size of the Earth, its gravitational field, creates state geodetic networks.</li>
+                <li><strong>Topography:</strong> the science of detailed representation of the Earth's surface on plans and maps (situation and relief).</li>
+                <li><strong>Engineering Geodesy:</strong> provides geodetic works for all stages of construction (surveys, design, construction, operation).</li>
+                <li><strong>Photogrammetry:</strong> creating maps from aerial and space images, using UAVs (drones).</li>
+                <li><strong>Cadastre:</strong> accounting for real estate, determining land plot boundaries.</li>
+              </ul>
+            </div>
+            <div class="fact-box">
+              <h4>Historical Fact</h4>
+              <p>The first geodetic works were carried out in Ancient Egypt to restore field boundaries after Nile floods and during pyramid construction. Eratosthenes of Cyrene (3rd century BC) was the first to fairly accurately calculate the radius of the Earth!</p>
+            </div>
+          `
+        }
+      },
+      {
+        title: { ru: "2. Фигура Земли и системы координат", en: "2. Figure of the Earth and Coordinate Systems" },
+        content: {
+          ru: `
+            <h2>Фигура Земли и системы координат</h2>
+            <div class="info-block">
+              <h4>Формы Земли</h4>
+              <p>Земля не является идеальным шаром. В геодезии используют несколько моделей:</p>
+              <ul>
+                <li><strong>Геоид:</strong> фигура, ограниченная уровенной поверхностью, совпадающей с поверхностью спокойного океана, мысленно продолженной под материками. Это «истинная» форма Земли.</li>
+                <li><strong>Эллипсоид вращения:</strong> математическая модель Земли. В России используется эллипсоид Красовского (в СК-42) и ПЗ-90.11 / ГЛОНАСС (в современных системах).</li>
+              </ul>
+            </div>
+            <div class="info-block">
+              <h4>Системы координат</h4>
+              <ul>
+                <li><strong>Географические координаты:</strong> широта (B или φ) и долгота (L или λ). Измеряются в градусах, минутах и секундах.</li>
+                <li><strong>Прямоугольные плоские координаты (X, Y):</strong> используются на топографических планах. В России применяется проекция Гаусса-Крюгера, где Земля разбивается на 6-градусные зоны. Ось X направлена на север, ось Y — на восток.</li>
+              </ul>
+            </div>
+            <div class="info-block">
+              <h4>Системы высот</h4>
+              <p><strong>Абсолютная высота (H)</strong> — расстояние по отвесной линии от точки до основной уровенной поверхности (уровня моря). В России используется <strong>Балтийская система высот</strong> (отсчет от нуля Кронштадтского футштока).</p>
+              <p><strong>Превышение (h)</strong> — разность высот двух точек: h = H₂ - H₁.</p>
+            </div>
+          `,
+          en: `
+            <h2>Figure of the Earth and Coordinate Systems</h2>
+            <div class="info-block">
+              <h4>Shapes of the Earth</h4>
+              <p>The Earth is not a perfect sphere. Several models are used in geodesy:</p>
+              <ul>
+                <li><strong>Geoid:</strong> a figure bounded by a level surface coinciding with the calm ocean surface, mentally extended under continents. This is the "true" shape of the Earth.</li>
+                <li><strong>Ellipsoid of revolution:</strong> mathematical model of the Earth. In Russia, the Krasovsky ellipsoid (in SK-42) and PZ-90.11 / GLONASS (in modern systems) are used.</li>
+              </ul>
+            </div>
+            <div class="info-block">
+              <h4>Coordinate Systems</h4>
+              <ul>
+                <li><strong>Geographic coordinates:</strong> latitude (B or φ) and longitude (L or λ). Measured in degrees, minutes and seconds.</li>
+                <li><strong>Rectangular plane coordinates (X, Y):</strong> used on topographic plans. In Russia, the Gauss-Krüger projection is used, where the Earth is divided into 6-degree zones. The X axis points north, the Y axis — east.</li>
+              </ul>
+            </div>
+            <div class="info-block">
+              <h4>Height Systems</h4>
+              <p><strong>Absolute height (H)</strong> — distance along the plumb line from a point to the main level surface (sea level). In Russia, the <strong>Baltic height system</strong> is used (counting from zero of the Kronstadt tide gauge).</p>
+              <p><strong>Elevation difference (h)</strong> — difference in heights of two points: h = H₂ - H₁.</p>
+            </div>
+          `
+        }
+      },
+      {
+        title: { ru: "3. Масштаб и виды измерений", en: "3. Scale and Types of Measurements" },
+        content: {
+          ru: `
+            <h2>Масштаб и основные виды измерений</h2>
+            <div class="info-block">
+              <h4>Понятие масштаба</h4>
+              <p><strong>Масштаб</strong> — степень уменьшения горизонтальных проложений линий местности при переносе их на план или карту.</p>
+              <ul>
+                <li><strong>Численный масштаб:</strong> дробь, где числитель 1 (например, 1:5000). Чем меньше знаменатель, тем крупнее масштаб и подробнее план.</li>
+                <li><strong>Именованный масштаб:</strong> словесное указание, например, «в 1 см 50 м».</li>
+                <li><strong>Линейный масштаб:</strong> графическое изображение в виде прямой линии с делениями.</li>
+              </ul>
+              <p><strong>Точность масштаба</strong> — горизонтальное расстояние на местности, соответствующее 0,1 мм на плане (для 1:5000 это 0,5 м).</p>
+            </div>
+            <div class="info-block">
+              <h4>Три основных вида измерений</h4>
+              <ol>
+                <li><strong>Измерение углов:</strong> горизонтальных и вертикальных. Выполняется теодолитом.</li>
+                <li><strong>Измерение расстояний:</strong> определение длины линий (рулетки, дальномеры, GPS).</li>
+                <li><strong>Измерение превышений:</strong> определение разности высот точек. Основной метод — геометрическое нивелирование.</li>
+              </ol>
+            </div>
+          `,
+          en: `
+            <h2>Scale and Types of Measurements</h2>
+            <div class="info-block">
+              <h4>Concept of Scale</h4>
+              <p><strong>Scale</strong> — degree of reduction of horizontal projections of terrain lines when transferring them to a plan or map.</p>
+              <ul>
+                <li><strong>Numerical scale:</strong> a fraction where the numerator is 1 (e.g., 1:5000). The smaller the denominator, the larger the scale and more detailed the plan.</li>
+                <li><strong>Named scale:</strong> verbal indication, e.g., "1 cm equals 50 m".</li>
+                <li><strong>Linear scale:</strong> graphical representation as a straight line with divisions.</li>
+              </ul>
+              <p><strong>Scale accuracy</strong> — horizontal distance on the ground corresponding to 0.1 mm on the plan (for 1:5000 this is 0.5 m).</p>
+            </div>
+            <div class="info-block">
+              <h4>Three Main Types of Measurements</h4>
+              <ol>
+                <li><strong>Angle measurement:</strong> horizontal and vertical. Performed with a theodolite.</li>
+                <li><strong>Distance measurement:</strong> determination of line lengths (tapes, rangefinders, GPS).</li>
+                <li><strong>Elevation measurement:</strong> determination of height differences between points. The main method is geometric leveling.</li>
+              </ol>
+            </div>
+          `
+        }
+      }
+    ],
+    quiz: [
+      { question: { ru: "Какая наука изучает форму и размеры Земли, а также её гравитационное поле?", en: "Which science studies the shape and size of the Earth, as well as its gravitational field?" }, options: { ru: ["Топография", "Высшая геодезия", "Фотограмметрия", "Инженерная геодезия"], en: ["Topography", "Higher Geodesy", "Photogrammetry", "Engineering Geodesy"] }, correct: 1 },
+      { question: { ru: "Как называется фигура Земли, ограниченная уровенной поверхностью океанов?", en: "What is the figure of the Earth bounded by the level surface of the oceans called?" }, options: { ru: ["Эллипсоид", "Сфера", "Геоид", "Плоскость"], en: ["Ellipsoid", "Sphere", "Geoid", "Plane"] }, correct: 2 },
+      { question: { ru: "В какой системе высот ведется отсчет в России?", en: "Which height system is used in Russia?" }, options: { ru: ["Балтийская система", "Североамериканская система", "Система WGS-84", "Относительная система"], en: ["Baltic system", "North American system", "WGS-84 system", "Relative system"] }, correct: 0 },
+      { question: { ru: "Что такое точность масштаба?", en: "What is scale accuracy?" }, options: { ru: ["0,1 мм на плане в масштабе местности", "1 см на плане", "Погрешность прибора", "Толщина линии на карте"], en: ["0.1 mm on the plan in ground scale", "1 cm on the plan", "Instrument error", "Line thickness on the map"] }, correct: 0 },
+      { question: { ru: "Какие три основных вида измерений существуют в геодезии?", en: "What are the three main types of measurements in geodesy?" }, options: { ru: ["Масса, объем, плотность", "Углы, расстояния, превышения", "Скорость, время, ускорение", "Широта, долгота, азимут"], en: ["Mass, volume, density", "Angles, distances, elevations", "Speed, time, acceleration", "Latitude, longitude, azimuth"] }, correct: 1 },
+      { question: { ru: "Что такое превышение (h)?", en: "What is elevation difference (h)?" }, options: { ru: ["Расстояние по горизонтали", "Разность высот двух точек", "Высота над уровнем моря", "Длина наклонной линии"], en: ["Horizontal distance", "Difference in heights of two points", "Height above sea level", "Length of inclined line"] }, correct: 1 },
+      { question: { ru: "Какая проекция используется для перехода от эллипсоида к плоскости в России?", en: "Which projection is used to transfer from ellipsoid to plane in Russia?" }, options: { ru: ["Проекция Меркатора", "Проекция Гаусса-Крюгера", "Азимутальная проекция", "Коническая проекция"], en: ["Mercator projection", "Gauss-Krüger projection", "Azimuthal projection", "Conic projection"] }, correct: 1 },
+      { question: { ru: "Что означает запись масштаба 1:500?", en: "What does the scale notation 1:500 mean?" }, options: { ru: ["1 см на плане = 500 м на местности", "1 см на плане = 5 м на местности", "1 см на плане = 50 м на местности", "1 мм на плане = 5 м на местности"], en: ["1 cm on plan = 500 m on ground", "1 cm on plan = 5 m on ground", "1 cm on plan = 50 m on ground", "1 mm on plan = 5 m on ground"] }, correct: 1 }
+    ]
+  },
+  {
+    id: 1, 
+    title: { ru: "Геодезические приборы", en: "Geodetic Instruments" }, 
+    icon: "🔭", 
+    description: { ru: "Устройство, принципы работы и применение теодолитов, нивелиров, тахеометров и GNSS.", en: "Design, operating principles and application of theodolites, levels, total stations and GNSS." },
+    lessons: [
+      {
+        title: { ru: "1. Теодолит: устройство и работа", en: "1. Theodolite: Design and Operation" },
+        content: {
+          ru: `
+            <h2>Теодолит: устройство и принципы работы</h2>
+            <div class="info-block">
+              <h4>Назначение и основные части</h4>
+              <p><strong>Теодолит</strong> — геодезический прибор для измерения горизонтальных и вертикальных углов.</p>
+              <ul>
+                <li><strong>Зрительная труба:</strong> для визирования на удаленные предметы.</li>
+                <li><strong>Лимб:</strong> стеклянный или металлический круг с оцифровкой от 0 до 360 градусов. Является мерой для отсчета углов.</li>
+                <li><strong>Алидада:</strong> вращающаяся часть, несущая отсчетное устройство и зрительную трубу.</li>
+                <li><strong>Подставка (трегер):</strong> для крепления прибора на штативе и его горизонтирования.</li>
+                <li><strong>Уровни:</strong> для приведения вертикальной оси прибора в отвесное положение.</li>
+              </ul>
+            </div>
+            <div class="info-block">
+              <h4>Поверки и юстировки</h4>
+              <p>Перед работой теодолит должен удовлетворять строгим геометрическим условиям (поверкам). Нарушение этих условий вызывает систематические погрешности (коллимационную ошибку), которые исключаются взятием отсчетов при двух положениях круга (КЛ — круг лево, КП — круг право).</p>
+            </div>
+          `,
+          en: `
+            <h2>Theodolite: Design and Operating Principles</h2>
+            <div class="info-block">
+              <h4>Purpose and Main Parts</h4>
+              <p><strong>Theodolite</strong> — a geodetic instrument for measuring horizontal and vertical angles.</p>
+              <ul>
+                <li><strong>Telescope:</strong> for sighting distant objects.</li>
+                <li><strong>Limb:</strong> glass or metal circle with graduation from 0 to 360 degrees. Serves as a measure for angle readings.</li>
+                <li><strong>Alidade:</strong> rotating part carrying the reading device and telescope.</li>
+                <li><strong>Tribrach (base):</strong> for mounting the instrument on a tripod and leveling it.</li>
+                <li><strong>Levels:</strong> for bringing the vertical axis of the instrument to a plumb position.</li>
+              </ul>
+            </div>
+            <div class="info-block">
+              <h4>Checks and Adjustments</h4>
+              <p>Before work, the theodolite must satisfy strict geometric conditions (checks). Violation of these conditions causes systematic errors (collimation error), which are eliminated by taking readings in two positions of the circle (FL — face left, FR — face right).</p>
+            </div>
+          `
+        }
+      },
+      {
+        title: { ru: "2. Нивелирование и нивелиры", en: "2. Leveling and Levels" },
+        content: {
+          ru: `
+            <h2>Нивелирование и нивелиры</h2>
+            <div class="info-block">
+              <h4>Сущность нивелирования</h4>
+              <p><strong>Нивелирование</strong> — процесс определения превышений между точками земной поверхности.</p>
+              <ul>
+                <li><strong>Геометрическое нивелирование:</strong> самый точный метод. Используется нивелир, дающий строгий горизонтальный луч, и две нивелирные рейки. Превышение: h = a (задний отсчет) - b (передний отсчет).</li>
+                <li><strong>Тригонометрическое нивелирование:</strong> выполняется теодолитом или тахеометром по измеренному углу наклона и расстоянию.</li>
+              </ul>
+            </div>
+            <div class="info-block">
+              <h4>Устройство нивелира</h4>
+              <p>Современные автоматические нивелиры содержат <strong>компенсатор</strong> — устройство, которое автоматически удерживает визирную ось в горизонтальном положении при небольших наклонах прибора.</p>
+            </div>
+          `,
+          en: `
+            <h2>Leveling and Levels</h2>
+            <div class="info-block">
+              <h4>Essence of Leveling</h4>
+              <p><strong>Leveling</strong> — the process of determining elevation differences between points on the Earth's surface.</p>
+              <ul>
+                <li><strong>Geometric leveling:</strong> the most accurate method. A level providing a strict horizontal beam and two leveling rods are used. Elevation: h = a (back sight) - b (fore sight).</li>
+                <li><strong>Trigonometric leveling:</strong> performed with a theodolite or total station based on measured inclination angle and distance.</li>
+              </ul>
+            </div>
+            <div class="info-block">
+              <h4>Level Design</h4>
+              <p>Modern automatic levels contain a <strong>compensator</strong> — a device that automatically keeps the line of sight in a horizontal position with small tilts of the instrument.</p>
+            </div>
+          `
+        }
+      },
+      {
+        title: { ru: "3. Тахеометры и GNSS", en: "3. Total Stations and GNSS" },
+        content: {
+          ru: `
+            <h2>Электронные тахеометры и GNSS</h2>
+            <div class="info-block">
+              <h4>Что такое тахеометр?</h4>
+              <p><strong>Тахеометр</strong> — это современный прибор, объединяющий в одном корпусе электронный теодолит, светодальномер и микрокомпьютер. Он за одно наведение измеряет углы, расстояния и мгновенно вычисляет координаты (X, Y, Z).</p>
+            </div>
+            <div class="info-block">
+              <h4>Спутниковая геодезия (GNSS)</h4>
+              <p>Глобальные навигационные системы (GPS, ГЛОНАСС, Galileo) позволяют определять координаты в любой точке Земли. Геодезические GNSS-приемники в режиме RTK (Real Time Kinematic) обеспечивают сантиметровую точность в реальном времени за счет передачи поправок от базовой станции.</p>
+            </div>
+            <div class="fact-box">
+              <h4>Вспомогательное оборудование</h4>
+              <p>Точность зависит и от мелочей: штатив должен быть устойчивым, инварная рулетка (сплав с минимальным тепловым расширением) используется для эталонных измерений, а призма тахеометра имеет "постоянную", которую нужно вводить в настройки прибора.</p>
+            </div>
+          `,
+          en: `
+            <h2>Electronic Total Stations and GNSS</h2>
+            <div class="info-block">
+              <h4>What is a Total Station?</h4>
+              <p><strong>Total station</strong> — a modern instrument combining an electronic theodolite, EDM (electronic distance meter) and microcomputer in one housing. It measures angles, distances and instantly calculates coordinates (X, Y, Z) in a single sighting.</p>
+            </div>
+            <div class="info-block">
+              <h4>Satellite Geodesy (GNSS)</h4>
+              <p>Global navigation systems (GPS, GLONASS, Galileo) allow determining coordinates at any point on Earth. Geodetic GNSS receivers in RTK (Real Time Kinematic) mode provide centimeter accuracy in real time through correction transmission from a base station.</p>
+            </div>
+            <div class="fact-box">
+              <h4>Auxiliary Equipment</h4>
+              <p>Accuracy also depends on details: the tripod must be stable, an invar tape (alloy with minimal thermal expansion) is used for reference measurements, and the total station prism has a "constant" that must be entered into the instrument settings.</p>
+            </div>
+          `
+        }
+      }
+    ],
+    quiz: [
+      { question: { ru: "Какая часть теодолита является мерой для отсчета углов?", en: "Which part of the theodolite serves as a measure for angle readings?" }, options: { ru: ["Зрительная труба", "Лимб", "Алидада", "Трегер"], en: ["Telescope", "Limb", "Alidade", "Tribrach"] }, correct: 1 },
+      { question: { ru: "Как исключается коллимационная ошибка при измерении углов?", en: "How is collimation error eliminated when measuring angles?" }, options: { ru: ["Поворотом прибора на 90 градусов", "Взятием отсчетов при КЛ и КП", "Заменой штатива", "Нагреванием прибора"], en: ["By rotating the instrument 90 degrees", "By taking readings in FL and FR", "By replacing the tripod", "By heating the instrument"] }, correct: 1 },
+      { question: { ru: "Как вычисляется превышение при геометрическом нивелировании?", en: "How is elevation calculated in geometric leveling?" }, options: { ru: ["h = передний отсчет - задний отсчет", "h = задний отсчет - передний отсчет", "h = расстояние × sin(угла)", "h = высота прибора + отсчет"], en: ["h = fore sight - back sight", "h = back sight - fore sight", "h = distance × sin(angle)", "h = instrument height + reading"] }, correct: 1 },
+      { question: { ru: "Какое устройство в нивелире автоматически удерживает визирную ось горизонтально?", en: "Which device in a level automatically keeps the line of sight horizontal?" }, options: { ru: ["Элевационный винт", "Компенсатор", "Круглый уровень", "Оптический микрометр"], en: ["Elevation screw", "Compensator", "Circular level", "Optical micrometer"] }, correct: 1 },
+      { question: { ru: "Какие три компонента объединяет в себе электронный тахеометр?", en: "Which three components does an electronic total station combine?" }, options: { ru: ["Нивелир, компас, рулетка", "Теодолит, светодальномер, микрокомпьютер", "GNSS, камера, принтер", "Лазерный сканер, дрон, планшет"], en: ["Level, compass, tape", "Theodolite, EDM, microcomputer", "GNSS, camera, printer", "Laser scanner, drone, tablet"] }, correct: 1 },
+      { question: { ru: "Какой метод GNSS обеспечивает сантиметровую точность в реальном времени?", en: "Which GNSS method provides centimeter accuracy in real time?" }, options: { ru: ["Статический", "Абсолютный", "RTK (кинематический в реальном времени)", "Барометрический"], en: ["Static", "Absolute", "RTK (Real Time Kinematic)", "Barometric"] }, correct: 2 },
+      { question: { ru: "Почему инварная рулетка используется для высокоточных измерений?", en: "Why is an invar tape used for high-precision measurements?" }, options: { ru: ["Она очень легкая", "Она дешевая", "Сплав инвар имеет минимальное тепловое расширение", "Она светится в темноте"], en: ["It is very light", "It is cheap", "Invar alloy has minimal thermal expansion", "It glows in the dark"] }, correct: 2 }
+    ]
+  },
+  {
+    id: 2, 
+    title: { ru: "Топографическая съёмка", en: "Topographic Survey" }, 
+    icon: "️", 
+    description: { ru: "Методы съёмки, условные знаки, изображение рельефа и камеральная обработка данных.", en: "Survey methods, conventional signs, relief representation and office data processing." },
+    lessons: [
+      {
+        title: { ru: "1. Понятие и методы съёмки", en: "1. Concept and Survey Methods" },
+        content: {
+          ru: `
+            <h2>Понятие и методы топографической съёмки</h2>
+            <div class="info-block">
+              <h4>Что такое топографическая съёмка?</h4>
+              <p><strong>Топографическая съёмка</strong> — комплекс полевых работ по измерению ситуации (контуров местности: зданий, дорог) и рельефа для создания топографических планов или цифровых моделей местности (ЦММ).</p>
+            </div>
+            <div class="info-block">
+              <h4>Основные методы съёмки</h4>
+              <ul>
+                <li><strong>Тахеометрическая съёмка:</strong> самый массовый метод. Быстро и точно фиксирует горизонтальный угол, расстояние и высоту с одной станции.</li>
+                <li><strong>Аэрофотосъёмка (БПЛА):</strong> создание ортофотопланов и 3D-моделей по снимкам с дронов. Идеально для больших территорий.</li>
+                <li><strong>Лазерное сканирование:</strong> получение сверхплотного «облака точек» для сложных объектов.</li>
+              </ul>
+            </div>
+          `,
+          en: `
+            <h2>Concept and Methods of Topographic Survey</h2>
+            <div class="info-block">
+              <h4>What is Topographic Survey?</h4>
+              <p><strong>Topographic survey</strong> — a complex of field works for measuring the situation (terrain contours: buildings, roads) and relief to create topographic plans or digital terrain models (DTM).</p>
+            </div>
+            <div class="info-block">
+              <h4>Main Survey Methods</h4>
+              <ul>
+                <li><strong>Total station survey:</strong> the most common method. Quickly and accurately records horizontal angle, distance and height from a single station.</li>
+                <li><strong>Aerial photography (UAV):</strong> creation of orthophoto plans and 3D models from drone images. Ideal for large areas.</li>
+                <li><strong>Laser scanning:</strong> obtaining ultra-dense "point clouds" for complex objects.</li>
+              </ul>
+            </div>
+          `
+        }
+      },
+      {
+        title: { ru: "2. Условные знаки и рельеф", en: "2. Conventional Signs and Relief" },
+        content: {
+          ru: `
+            <h2>Топографические условные знаки и рельеф</h2>
+            <div class="info-block">
+              <h4>Классификация знаков</h4>
+              <ol>
+                <li><strong>Масштабные:</strong> размеры знака соответствуют размерам объекта в масштабе (лес, озеро, здание).</li>
+                <li><strong>Внемасштабные:</strong> для объектов, которые невозможно изобразить в данном масштабе из-за малых размеров (колодец, геодезический пункт, столб).</li>
+                <li><strong>Линейные:</strong> длина выражается в масштабе, а ширина нет (дороги, реки, ЛЭП).</li>
+                <li><strong>Пояснительные:</strong> цифровые и буквенные подписи (высота дерева, ширина дороги).</li>
+              </ol>
+            </div>
+            <div class="info-block">
+              <h4>Метод горизонталей</h4>
+              <p>Рельеф изображают <strong>горизонталями</strong> — линиями, соединяющими точки с одинаковой абсолютной высотой.</p>
+              <ul>
+                <li><strong>Высота сечения рельефа (h):</strong> разность высот между двумя соседними основными горизонталями (обычно 0.5 м, 1 м или 2 м).</li>
+                <li><strong>Заложение:</strong> расстояние между горизонталями на плане. Чем оно меньше, тем круче склон.</li>
+                <li><strong>Бергштрихи:</strong> короткие черточки, указывающие направление ската (вниз).</li>
+              </ul>
+            </div>
+          `,
+          en: `
+            <h2>Topographic Conventional Signs and Relief</h2>
+            <div class="info-block">
+              <h4>Classification of Signs</h4>
+              <ol>
+                <li><strong>Scale (area) signs:</strong> sign dimensions correspond to object dimensions in scale (forest, lake, building).</li>
+                <li><strong>Non-scale signs:</strong> for objects that cannot be depicted at the given scale due to small size (well, geodetic point, pole).</li>
+                <li><strong>Linear signs:</strong> length is expressed in scale, but width is not (roads, rivers, power lines).</li>
+                <li><strong>Explanatory signs:</strong> numeric and letter labels (tree height, road width).</li>
+              </ol>
+            </div>
+            <div class="info-block">
+              <h4>Contour Line Method</h4>
+              <p>Relief is depicted by <strong>contour lines</strong> — lines connecting points with the same absolute height.</p>
+              <ul>
+                <li><strong>Contour interval (h):</strong> height difference between two adjacent main contour lines (usually 0.5 m, 1 m or 2 m).</li>
+                <li><strong>Spacing:</strong> distance between contour lines on the plan. The smaller it is, the steeper the slope.</li>
+                <li><strong>Hachures:</strong> short dashes indicating the direction of slope (downward).</li>
+              </ul>
+            </div>
+          `
+        }
+      },
+      {
+        title: { ru: "3. Камеральная обработка", en: "3. Office Processing" },
+        content: {
+          ru: `
+            <h2>Камеральная обработка материалов съёмки</h2>
+            <div class="info-block">
+              <h4>От поля к компьютеру</h4>
+              <p><strong>Камеральные работы</strong> — этап обработки полевых измерений и составления итогового плана:</p>
+              <ol>
+                <li><strong>Выгрузка данных:</strong> перенос координат пикетов из памяти прибора в ПК.</li>
+                <li><strong>Уравнивание ходов:</strong> математическая обработка для распределения невязок (погрешностей).</li>
+                <li><strong>Построение ЦММ:</strong> создание цифровой модели местности (TIN-модели из треугольников) в ПО (AutoCAD Civil 3D, CREDO).</li>
+                <li><strong>Отрисовка:</strong> генерация горизонталей, нанесение условных знаков и текстовых подписей.</li>
+              </ol>
+            </div>
+            <div class="fact-box">
+              <h4>Тренд отрасли</h4>
+              <p>Сегодня всё чаще используется связка «БПЛА + фотограмметрия». Дрон облетает участок за 15 минут, а программа (Agisoft Metashape) автоматически строит ортофотоплан и 3D-модель с точностью до 3-5 см.</p>
+            </div>
+          `,
+          en: `
+            <h2>Office Processing of Survey Materials</h2>
+            <div class="info-block">
+              <h4>From Field to Computer</h4>
+              <p><strong>Office work</strong> — stage of processing field measurements and compiling the final plan:</p>
+              <ol>
+                <li><strong>Data download:</strong> transferring picket coordinates from instrument memory to PC.</li>
+                <li><strong>Traverse adjustment:</strong> mathematical processing to distribute misclosures (errors).</li>
+                <li><strong>DTM construction:</strong> creating a digital terrain model (TIN model from triangles) in software (AutoCAD Civil 3D, CREDO).</li>
+                <li><strong>Drawing:</strong> generating contour lines, applying conventional signs and text labels.</li>
+              </ol>
+            </div>
+            <div class="fact-box">
+              <h4>Industry Trend</h4>
+              <p>Today, the "UAV + photogrammetry" combination is increasingly used. A drone surveys an area in 15 minutes, and software (Agisoft Metashape) automatically builds an orthophoto plan and 3D model with 3-5 cm accuracy.</p>
+            </div>
+          `
+        }
+      }
+    ],
+    quiz: [
+      { question: { ru: "Что является результатом топографической съёмки?", en: "What is the result of a topographic survey?" }, options: { ru: ["Фотография местности", "Топографический план или ЦММ", "Текстовый отчет", "Видео с дрона"], en: ["Terrain photograph", "Topographic plan or DTM", "Text report", "Drone video"] }, correct: 1 },
+      { question: { ru: "Какой метод съёмки является основным и самым массовым в настоящее время?", en: "Which survey method is the main and most widespread today?" }, options: { ru: ["Мензульная", "Тахеометрическая", "Глазомерная", "Барометрическая"], en: ["Plane table", "Total station", "Visual estimation", "Barometric"] }, correct: 1 },
+      { question: { ru: "К какой группе знаков относится отдельный колодец на плане 1:5000?", en: "Which group of signs does an individual well belong to on a 1:5000 plan?" }, options: { ru: ["Масштабные", "Линейные", "Внемасштабные", "Пояснительные"], en: ["Scale", "Linear", "Non-scale", "Explanatory"] }, correct: 2 },
+      { question: { ru: "Что такое высота сечения рельефа?", en: "What is contour interval?" }, options: { ru: ["Высота самой высокой горы", "Разность высот между соседними основными горизонталями", "Расстояние между горизонталями на плане", "Средняя высота участка"], en: ["Height of the highest mountain", "Height difference between adjacent main contour lines", "Distance between contour lines on the plan", "Average site height"] }, correct: 1 },
+      { question: { ru: "О чем свидетельствует малое расстояние (заложение) между горизонталями?", en: "What does a small distance (spacing) between contour lines indicate?" }, options: { ru: ["О равнинной местности", "О крутом склоне", "О наличии водоема", "О высокой точности съёмки"], en: ["Flat terrain", "Steep slope", "Presence of a water body", "High survey accuracy"] }, correct: 1 },
+      { question: { ru: "Для чего используются бергштрихи?", en: "What are hachures used for?" }, options: { ru: ["Для указания направления ската (вниз)", "Для обозначения дорог", "Для измерения расстояний", "Для указания сторон света"], en: ["To indicate slope direction (downward)", "To mark roads", "To measure distances", "To indicate cardinal directions"] }, correct: 0 },
+      { question: { ru: "Что такое TIN-модель в камеральной обработке?", en: "What is a TIN model in office processing?" }, options: { ru: ["Текстовый файл с координатами", "Цифровая модель местности из нерегулярных треугольников", "Список условных знаков", "Тип принтера"], en: ["Text file with coordinates", "Digital terrain model from irregular triangles", "List of conventional signs", "Printer type"] }, correct: 1 },
+      { question: { ru: "Какой этап НЕ относится к камеральным работам?", en: "Which stage does NOT belong to office work?" }, options: { ru: ["Уравнивание геодезических ходов", "Отрисовка горизонталей в AutoCAD", "Установка штатива и центрирование прибора", "Выгрузка данных из прибора"], en: ["Traverse adjustment", "Drawing contour lines in AutoCAD", "Setting up tripod and centering instrument", "Downloading data from instrument"] }, correct: 2 }
+    ]
+  }
+];
+
+// ===== ИНИЦИАЛИЗАЦИЯ =====
+function createBubbles() {
+  const c = document.getElementById('bg-bubbles');
+  for (let i = 0; i < 15; i++) {
+    const b = document.createElement('div'); b.className = 'bubble';
+    const s = Math.random() * 120 + 40;
+    b.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*15}s;animation-duration:${20 + Math.random()*10}s`;
+    c.appendChild(b);
+  }
+}
+
+function loadState() {
+  const saved = localStorage.getItem('geoProState');
+  if (saved) { 
+    try { 
+      const parsed = JSON.parse(saved);
+      appState = { ...appState, ...parsed };
+    } catch(e) {} 
+  }
+  
+  const savedTheme = localStorage.getItem('geoProTheme');
+  if (savedTheme) { currentTheme = themes.indexOf(savedTheme); setTheme(savedTheme); }
+  
+  const savedLang = localStorage.getItem('geoProLang');
+  if (savedLang) { currentLang = savedLang; document.getElementById('lang-select').value = savedLang; }
+  
+  applyTranslations();
+  clearGameSession();
+  initLobby();
+  showPage('learn');
+}
+
+function saveState() { 
+  localStorage.setItem('geoProState', JSON.stringify(appState)); 
+}
+
+function resetProgress() {
+  if(confirm(currentLang === 'ru' ? 'Вы уверены? Весь прогресс обучения и игры будет удален из кэша браузера.' : 'Are you sure? All learning and game progress will be deleted from browser cache.')) {
+    appState = { profile: appState.profile, completedLessons: [], completedSections: [], quizScores: {}, stats: { gamesPlayed: 0, correctAnswers: 0 } };
+    saveState(); clearGameSession(); applyTranslations(); showPage('learn');
+  }
+}
+
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  const navBtn = document.getElementById('nav-' + pageId);
+  if (navBtn) navBtn.classList.add('active');
+  if (pageId === 'learn') applyTranslations();
+  if (pageId === 'profile') updateProfileUI();
+  if (pageId === 'lobby') renderLobby();
+}
+
+// ===== ПРОФИЛЬ =====
+function handleAvatarUpload(event) {
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) { 
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+      const maxSize = 500; let width = img.width, height = img.height;
+      if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } }
+      else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } }
+      canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
+      appState.profile.avatar = canvas.toDataURL('image/jpeg', 0.8);
+      saveState(); updateProfileUI(); showSaveConfirmation();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveProfile() {
+  const name = document.getElementById('profile-name-input').value.trim();
+  if (!name) { alert(currentLang === 'ru' ? 'Введите имя!' : 'Enter your name!'); return; }
+  appState.profile.name = name; 
+  saveState(); updateProfileUI();
+  if (gameState.players.length > 0 && gameState.players[0].type === 'human') {
+    gameState.players[0].name = name; gameState.players[0].avatar = appState.profile.avatar; saveGameState();
+  }
+  showSaveConfirmation();
+}
+
+function showSaveConfirmation() {
+  const btn = document.getElementById('save-profile-btn');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = t('saved_msg');
+  btn.style.background = '#28a745';
+  setTimeout(() => { btn.innerHTML = originalText; btn.style.background = ''; }, 2000);
+}
+
+function updateProfileUI() {
+  const name = appState.profile.name;
+  const avatarImg = document.getElementById('avatar-img'), avatarEmoji = document.getElementById('avatar-emoji');
+  if (appState.profile.avatar) { avatarImg.src = appState.profile.avatar; avatarImg.style.display = 'block'; avatarEmoji.style.display = 'none'; }
+  else { avatarImg.style.display = 'none'; avatarEmoji.style.display = 'block'; }
+  if (name) {
+    document.getElementById('profile-greeting').textContent = currentLang === 'ru' ? `Привет, ${name}!` : `Hello, ${name}!`;
+    document.getElementById('profile-name-input').value = name;
+    document.getElementById('profile-stats').style.display = 'grid';
+    document.getElementById('stat-sections').textContent = appState.completedSections.length;
+    document.getElementById('stat-games').textContent = appState.stats.gamesPlayed;
+    document.getElementById('stat-correct').textContent = appState.stats.correctAnswers;
+  }
+}
+
+// ===== ОБУЧЕНИЕ =====
+function renderSections() {
+  const grid = document.getElementById('sections-grid'); grid.innerHTML = '';
+  const completed = appState.completedSections;
+  document.getElementById('learn-progress').style.width = (completed.length / sections.length * 100) + '%';
+  document.getElementById('progress-text').textContent = t('progress_text', completed.length, sections.length);
+
+  sections.forEach((section, index) => {
+    const isCompleted = completed.includes(index);
+    const isUnlocked = index === 0 || completed.includes(index - 1);
+    const card = document.createElement('div');
+    card.className = `section-card ${isCompleted ? 'completed' : ''} ${!isUnlocked ? 'locked' : ''}`;
+    card.innerHTML = `
+      ${isCompleted ? `<div class="badge">${t('completed_badge')}</div>` : ''}
+      ${!isUnlocked ? '<div class="lock-icon"></div>' : ''}
+      <span class="icon">${section.icon}</span>
+      <h3>${section.title[currentLang]}</h3>
+      <p>${section.description[currentLang]}</p>
+      <div class="section-meta">
+        <span>${t('sections_count', section.lessons.length)}</span>
+        <span>${t('questions_count', section.quiz.length)}</span>
+      </div>`;
+    if (isUnlocked) card.onclick = () => openSection(index);
+    grid.appendChild(card);
+  });
+
+  if (completed.length === sections.length) {
+    const finalCard = document.createElement('div');
+    finalCard.className = 'final-quiz-card';
+    finalCard.innerHTML = `<span class="icon">🏆</span><h3>${t('final_quiz_title')}</h3><p>${t('final_quiz_desc')}</p>`;
+    finalCard.onclick = startFinalQuiz;
+    grid.appendChild(finalCard);
+  }
+}
+
+function openSection(sectionIndex) {
+  currentSection = sectionIndex;
+  const section = sections[sectionIndex];
+  showPage('section-viewer');
+  
+  const sidebar = document.getElementById('lesson-sidebar');
+  sidebar.innerHTML = `<h3 style="margin-bottom:20px; color:var(--green-dark); padding:0 10px;">${section.icon} ${section.title[currentLang]}</h3>`;
+  
+  section.lessons.forEach((lesson, idx) => {
+    const lessonId = `${sectionIndex}-${idx}`;
+    const isCompleted = appState.completedLessons.includes(lessonId);
+    const item = document.createElement('div');
+    item.className = `lesson-nav-item ${idx === 0 ? 'active' : ''} ${isCompleted ? 'completed' : ''}`;
+    item.dataset.idx = idx;
+    item.innerHTML = `<span class="check">✓</span> <span>${lesson.title[currentLang]}</span>`;
+    item.onclick = () => loadLesson(sectionIndex, idx);
+    sidebar.appendChild(item);
+  });
+  
+  const testBtn = document.createElement('button');
+  testBtn.className = 'btn-primary'; testBtn.style.marginTop = 'auto';
+  testBtn.innerHTML = t('final_test_btn');
+  testBtn.onclick = () => startQuiz(sectionIndex);
+  sidebar.appendChild(testBtn);
+  
+  loadLesson(sectionIndex, 0);
+}
+
+function loadLesson(sectionIndex, lessonIndex) {
+  const section = sections[sectionIndex];
+  const lesson = section.lessons[lessonIndex];
+  const lessonId = `${sectionIndex}-${lessonIndex}`;
+  
+  document.querySelectorAll('.lesson-nav-item').forEach((item, idx) => item.classList.toggle('active', idx === lessonIndex));
+  
+  if (!appState.completedLessons.includes(lessonId)) {
+    appState.completedLessons.push(lessonId); saveState();
+    const navItem = document.querySelector(`.lesson-nav-item[data-idx="${lessonIndex}"]`);
+    if (navItem) navItem.classList.add('completed');
+  }
+  
+  const contentArea = document.getElementById('lesson-content-area');
+  contentArea.innerHTML = lesson.content[currentLang];
+  
+  const actionsDiv = document.createElement('div'); actionsDiv.className = 'lesson-actions';
+  const prevBtn = document.createElement('button'); prevBtn.className = 'btn-secondary'; prevBtn.textContent = t('prev_lesson');
+  prevBtn.disabled = lessonIndex === 0; prevBtn.onclick = () => loadLesson(sectionIndex, lessonIndex - 1);
+  
+  const nextBtn = document.createElement('button'); nextBtn.className = 'btn-primary';
+  if (lessonIndex === section.lessons.length - 1) {
+    nextBtn.innerHTML = t('go_to_test'); nextBtn.onclick = () => startQuiz(sectionIndex);
+  } else {
+    nextBtn.innerHTML = t('next_lesson'); nextBtn.onclick = () => loadLesson(sectionIndex, lessonIndex + 1);
+  }
+  actionsDiv.appendChild(prevBtn); actionsDiv.appendChild(nextBtn); contentArea.appendChild(actionsDiv);
+  contentArea.scrollTop = 0;
+}
+
+// ===== ТЕСТИРОВАНИЕ =====
+function startQuiz(sectionIndex) {
+  currentQuiz = {
+    sectionIndex: sectionIndex,
+    questions: [...sections[sectionIndex].quiz].sort(() => Math.random() - 0.5),
+    currentQ: 0, score: 0, answers: []
+  };
+  document.getElementById('modal-overlay').classList.add('active');
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  const q = currentQuiz.questions[currentQuiz.currentQ];
+  const total = currentQuiz.questions.length;
+  const num = currentQuiz.currentQ + 1;
+  
+  document.getElementById('modal-body').innerHTML = `
+    <div class="quiz-header">
+      <h2>${t('quiz_header', sections[currentQuiz.sectionIndex].title[currentLang])}</h2>
+      <div class="quiz-progress"><span>${t('quiz_progress', num, total)}</span><span>${t('quiz_verno', currentQuiz.score)}</span></div>
+      <div class="progress-bar" style="height:8px; margin-top:10px;"><div class="fill" style="width:${(num/total)*100}%"></div></div>
+    </div>
+    <div class="quiz-question">${q.question[currentLang]}</div>
+    <div class="quiz-options">
+      ${q.options[currentLang].map((opt, idx) => `
+        <button class="quiz-option" onclick="answerQuiz(${idx}, ${q.correct}, this)">
+          <span style="display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:var(--pink); font-weight:700; font-size:0.9em;">${String.fromCharCode(65 + idx)}</span>
+          ${opt}
+        </button>
+      `).join('')}
+    </div>`;
+}
+
+function answerQuiz(selectedIdx, correctIdx, btnElement) {
+  const buttons = document.querySelectorAll('.quiz-option');
+  buttons.forEach(btn => btn.disabled = true);
+  const isCorrect = selectedIdx === correctIdx;
+  if (isCorrect) { btnElement.classList.add('correct'); currentQuiz.score++; }
+  else { btnElement.classList.add('wrong'); buttons[correctIdx].classList.add('correct'); }
+  currentQuiz.answers.push(isCorrect);
+  
+  setTimeout(() => {
+    currentQuiz.currentQ++;
+    if (currentQuiz.currentQ < currentQuiz.questions.length) renderQuizQuestion();
+    else finishQuiz();
+  }, 1200);
+}
+
+function finishQuiz() {
+  const total = currentQuiz.questions.length, score = currentQuiz.score;
+  const percent = Math.round((score / total) * 100);
+  const sectionIdx = currentQuiz.sectionIndex;
+  
+  appState.quizScores[sectionIdx] = { score, total, percent };
+  if (percent >= 70 && !appState.completedSections.includes(sectionIdx)) appState.completedSections.push(sectionIdx);
+  appState.stats.correctAnswers += score; saveState();
+  
+  let message = '';
+  if (percent === 100) message = t('quiz_result_msg_100');
+  else if (percent >= 80) message = t('quiz_result_msg_80');
+  else if (percent >= 70) message = t('quiz_result_msg_70');
+  else message = t('quiz_result_msg_fail');
+  
+  const catSVG = `
+    <div class="cat-container">
+      <svg class="cat-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="100" cy="140" rx="50" ry="45" fill="#FFB6C1"/>
+        <circle cx="100" cy="80" r="45" fill="#FFB6C1"/>
+        <polygon points="65,50 55,20 80,40" fill="#FFB6C1"/>
+        <polygon points="135,50 145,20 120,40" fill="#FFB6C1"/>
+        <polygon points="68,48 60,25 78,42" fill="#FF69B4"/>
+        <polygon points="132,48 140,25 122,42" fill="#FF69B4"/>
+        <ellipse cx="85" cy="75" rx="8" ry="10" fill="#333"/>
+        <ellipse cx="115" cy="75" rx="8" ry="10" fill="#333"/>
+        <circle cx="87" cy="72" r="3" fill="white"/>
+        <circle cx="117" cy="72" r="3" fill="white"/>
+        <polygon points="100,85 95,90 105,90" fill="#FF69B4"/>
+        <path d="M 95 92 Q 100 95 105 92" stroke="#333" stroke-width="2" fill="none"/>
+        <line x1="70" y1="85" x2="50" y2="82" stroke="#333" stroke-width="1.5"/>
+        <line x1="70" y1="90" x2="50" y2="92" stroke="#333" stroke-width="1.5"/>
+        <line x1="130" y1="85" x2="150" y2="82" stroke="#333" stroke-width="1.5"/>
+        <line x1="130" y1="90" x2="150" y2="92" stroke="#333" stroke-width="1.5"/>
+        <g class="cat-paw">
+          <ellipse cx="140" cy="150" rx="15" ry="20" fill="#FFB6C1"/>
+          <circle cx="135" cy="145" r="3" fill="#FF69B4"/>
+          <circle cx="145" cy="145" r="3" fill="#FF69B4"/>
+          <circle cx="140" cy="140" r="3" fill="#FF69B4"/>
+        </g>
+        <path d="M 50 140 Q 30 130 35 110" stroke="#FFB6C1" stroke-width="12" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>`;
+  
+  document.getElementById('modal-body').innerHTML = `
+    <div class="quiz-result">
+      ${catSVG}
+      <h2 style="color:var(--green-dark); margin-bottom:20px;">${t('quiz_result_title')}</h2>
+      <div class="score-circle" style="--percent: ${percent}"><div class="score-text">${percent}%</div></div>
+      <p style="font-size:1.2em; color:var(--text); margin-bottom:10px;">${t('quiz_result_text', score, total)}</p>
+      <p style="color:var(--text-light); margin-bottom:30px; line-height:1.6;">${message}</p>
+      <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn-secondary" onclick="closeModal(); showPage('learn');">${t('to_sections')}</button>
+        ${percent < 70 ? `<button class="btn-primary" onclick="startQuiz(${sectionIdx})">${t('retake_quiz')}</button>` : ''}
+        ${percent >= 70 && sectionIdx < sections.length - 1 ? `<button class="btn-primary" onclick="closeModal(); openSection(${sectionIdx + 1});">${t('next_section')}</button>` : ''}
+      </div>
+    </div>`;
+}
+
+function closeModal() { 
+  document.getElementById('modal-overlay').classList.remove('active'); 
+  updateProfileUI(); renderSections();
+}
+
+// ===== ФИНАЛЬНЫЙ КВИЗ =====
+function shuffleArray(array) {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+function startFinalQuiz() {
+  const allQuestions = [];
+  sections.forEach(section => {
+    section.quiz.forEach((q, qIndex) => {
+      allQuestions.push({ ...q, sectionTitle: section.title[currentLang], sectionIcon: section.icon, questionId: `${section.id}-${qIndex}` });
+    });
+  });
+  finalQuizState.questions = shuffleArray(allQuestions);
+  finalQuizState.currentIndex = 0; finalQuizState.score = 0; finalQuizState.totalQuestions = finalQuizState.questions.length;
+  showFinalQuizQuestion();
+}
+
+function showFinalQuizQuestion() {
+  const q = finalQuizState.questions[finalQuizState.currentIndex];
+  const progress = ((finalQuizState.currentIndex) / finalQuizState.totalQuestions) * 100;
+  document.getElementById('modal-body').innerHTML = `
+    <div style="text-align:center; background:linear-gradient(135deg, #ffd54f, #ffb300); padding:20px; border-radius:16px; margin-bottom:20px; color:white;">
+      <h2 style="font-size:1.8em; text-shadow:0 2px 4px rgba(0,0,0,0.2);">${t('final_quiz_title')}</h2>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin:15px 0; padding:10px 15px; background:var(--white); border-radius:12px; border:2px solid var(--pink);">
+      <div><strong>${t('final_quiz_question')} ${finalQuizState.currentIndex + 1} ${t('of')} ${finalQuizState.totalQuestions}</strong>
+      <div style="margin-top:8px; font-size:0.9em; color:var(--text-light);">${q.sectionIcon} ${q.sectionTitle}</div></div>
+      <div style="font-size:1.2em; font-weight:bold; color:var(--green-dark);">${t('final_quiz_score')}: ${finalQuizState.score}/${finalQuizState.totalQuestions}</div>
+    </div>
+    <div class="progress-bar" style="margin-bottom:20px;"><div class="fill" style="width:${progress}%"></div></div>
+    <div class="quiz-container">
+      <div class="quiz-question">${q.question[currentLang]}</div>
+      <div class="quiz-options">
+        ${q.options[currentLang].map((opt, i) => `<button class="quiz-option" onclick="answerFinalQuiz(${i}, ${q.correct})">${opt}</button>`).join('')}
+      </div>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+function answerFinalQuiz(selected, correct) {
+  const buttons = document.querySelectorAll('#modal-body .quiz-option');
+  buttons.forEach((btn, i) => {
+    btn.onclick = null; btn.disabled = true;
+    if (i === correct) btn.classList.add('correct');
+    if (i === selected && i !== correct) btn.classList.add('wrong');
+  });
+  if (selected === correct) finalQuizState.score++;
+  setTimeout(() => {
+    finalQuizState.currentIndex++;
+    if (finalQuizState.currentIndex < finalQuizState.totalQuestions) showFinalQuizQuestion();
+    else showFinalQuizResult();
+  }, 1200);
+}
+
+function showFinalQuizResult() {
+  const percentage = Math.round((finalQuizState.score / finalQuizState.totalQuestions) * 100);
+  let message = '';
+  if (percentage === 100) message = t('final_quiz_perfect');
+  else if (percentage >= 80) message = t('final_quiz_great');
+  else if (percentage >= 60) message = t('final_quiz_good');
+  else message = t('final_quiz_try_again');
+  
+  appState.stats.correctAnswers += finalQuizState.score; saveState();
+  
+  const catSVG = `
+    <div class="cat-container">
+      <svg class="cat-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="100" cy="140" rx="50" ry="45" fill="#FFB6C1"/>
+        <circle cx="100" cy="80" r="45" fill="#FFB6C1"/>
+        <polygon points="65,50 55,20 80,40" fill="#FFB6C1"/>
+        <polygon points="135,50 145,20 120,40" fill="#FFB6C1"/>
+        <polygon points="68,48 60,25 78,42" fill="#FF69B4"/>
+        <polygon points="132,48 140,25 122,42" fill="#FF69B4"/>
+        <ellipse cx="85" cy="75" rx="8" ry="10" fill="#333"/>
+        <ellipse cx="115" cy="75" rx="8" ry="10" fill="#333"/>
+        <circle cx="87" cy="72" r="3" fill="white"/>
+        <circle cx="117" cy="72" r="3" fill="white"/>
+        <polygon points="100,85 95,90 105,90" fill="#FF69B4"/>
+        <path d="M 95 92 Q 100 95 105 92" stroke="#333" stroke-width="2" fill="none"/>
+        <line x1="70" y1="85" x2="50" y2="82" stroke="#333" stroke-width="1.5"/>
+        <line x1="70" y1="90" x2="50" y2="92" stroke="#333" stroke-width="1.5"/>
+        <line x1="130" y1="85" x2="150" y2="82" stroke="#333" stroke-width="1.5"/>
+        <line x1="130" y1="90" x2="150" y2="92" stroke="#333" stroke-width="1.5"/>
+        <g class="cat-paw">
+          <ellipse cx="140" cy="150" rx="15" ry="20" fill="#FFB6C1"/>
+          <circle cx="135" cy="145" r="3" fill="#FF69B4"/>
+          <circle cx="145" cy="145" r="3" fill="#FF69B4"/>
+          <circle cx="140" cy="140" r="3" fill="#FF69B4"/>
+        </g>
+        <path d="M 50 140 Q 30 130 35 110" stroke="#FFB6C1" stroke-width="12" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>`;
+  
+  document.getElementById('modal-body').innerHTML = `
+    <div class="quiz-result">
+      ${catSVG}
+      <h2 style="font-size:2em; color:var(--green-dark); margin-bottom:15px;">${t('final_quiz_complete')}</h2>
+      <div style="font-size:3em; font-weight:bold; color:#ffb300; margin:20px 0; text-shadow:0 2px 4px rgba(0,0,0,0.1);">${finalQuizState.score} / ${finalQuizState.totalQuestions}</div>
+      <div style="font-size:1.5em; color:var(--green-dark); margin-bottom:15px;">${percentage}%</div>
+      <p style="font-size:1.2em; color:var(--text); margin-bottom:20px; line-height:1.6;">${message}</p>
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:20px;">
+        <button class="btn-primary" onclick="startFinalQuiz()">${t('restart_final_quiz')}</button>
+        <button class="btn-secondary" onclick="closeModal()">${t('back_to_learn')}</button>
+      </div>
+    </div>`;
+}
+
+// ===== ЛОББИ И ИГРА =====
+function saveGameState() {
+  try { localStorage.setItem('geodesyGameSession', JSON.stringify({ ...gameState, usedQuestions: Array.from(usedQuestions) })); } catch(e) {}
+}
+function clearGameSession() { localStorage.removeItem('geodesyGameSession'); usedQuestions.clear(); }
+
+function initLobby() {
+  clearGameSession();
+  gameState.players = [{ name: appState.profile.name || (currentLang === 'ru' ? 'Игрок 1' : 'Player 1'), avatar: appState.profile.avatar, type: 'human' }];
+  renderLobby();
+}
+
+function renderLobby() {
+  const container = document.getElementById('player-slots'); container.innerHTML = '';
+  gameState.players.forEach((player, index) => {
+    const slot = document.createElement('div'); slot.className = 'player-slot filled';
+    const infoDiv = document.createElement('div'); infoDiv.className = 'slot-info';
+    
+    const nameLabel = document.createElement('div'); nameLabel.style.cssText = 'font-size:0.75em; color:var(--text-light); font-weight:600;'; nameLabel.textContent = t('name_label');
+    const nameInput = document.createElement('input'); nameInput.type = 'text'; nameInput.className = 'slot-name-input'; nameInput.value = player.name; nameInput.maxLength = 15;
+    nameInput.onchange = function() { gameState.players[index].name = this.value || (currentLang === 'ru' ? `Игрок ${index + 1}` : `Player ${index + 1}`); saveGameState(); };
+    if (index === 0) { nameInput.disabled = true; nameInput.style.opacity = '0.7'; }
+    
+    const typeLabel = document.createElement('div'); typeLabel.style.cssText = 'font-size:0.75em; color:var(--text-light); font-weight:600;'; typeLabel.textContent = t('player_type_label');
+    const typeSelect = document.createElement('select'); typeSelect.className = 'slot-type-select';
+    typeSelect.innerHTML = `<option value="human" ${player.type === 'human' ? 'selected' : ''}>${t('player_type_human')}</option><option value="bot" ${player.type === 'bot' ? 'selected' : ''}>${t('player_type_bot')}</option>`;
+    typeSelect.onchange = function() { gameState.players[index].type = this.value; saveGameState(); renderLobby(); };
+    if (index === 0) { typeSelect.disabled = true; typeSelect.style.opacity = '0.7'; }
+    
+    infoDiv.appendChild(nameLabel); infoDiv.appendChild(nameInput); infoDiv.appendChild(typeLabel); infoDiv.appendChild(typeSelect);
+    slot.innerHTML = `<div class="slot-avatar">${player.avatar && index === 0 ? `<img src="${player.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : (player.type === 'bot' ? '' : player.name[0].toUpperCase())}</div>`;
+    slot.appendChild(infoDiv);
+    
+    if (index > 0) {
+      const removeBtn = document.createElement('button'); removeBtn.textContent = '✕';
+      removeBtn.style.cssText = 'background:#ffcdd2; border:none; border-radius:50%; width:28px; height:28px; cursor:pointer; font-weight:bold; color:#c62828; flex-shrink:0;';
+      removeBtn.onclick = () => { gameState.players.splice(index, 1); saveGameState(); renderLobby(); };
+      slot.appendChild(removeBtn);
+    }
+    container.appendChild(slot);
+  });
+  
+  if (gameState.players.length < 6) {
+    const addSlot = document.createElement('div'); addSlot.className = 'player-slot empty'; addSlot.textContent = '+ ' + t('add_player_label');
+    addSlot.onclick = () => {
+      if (gameState.players.length >= 6) { alert(t('max_players')); return; }
+      gameState.players.push({ name: `${t('human')} ${gameState.players.filter(p => p.type === 'human').length + 1}`, avatar: null, type: 'human' });
+      saveGameState(); renderLobby(); showMessage(t('player_joined'), 'success');
+    };
+    container.appendChild(addSlot);
+  }
+  document.getElementById('start-lobby-btn').disabled = gameState.players.length < 2;
+}
+
+function startGameFromLobby() {
+  if (gameState.players.length < 2) { alert(t('need_two_players')); return; }
+  if (appState.completedSections.length === 0) { alert(t('need_section')); showPage('learn'); return; }
+  
+  gameState.players.forEach((p, i) => { p.position = 0; p.color = PLAYER_COLORS[i % PLAYER_COLORS.length]; });
+  gameState.currentPlayerIndex = 0; gameState.isRolling = false; gameState.gameOver = false; gameState.canRollDice = false;
+  usedQuestions.clear(); saveGameState();
+  
+  document.getElementById('page-lobby').classList.remove('active');
+  document.getElementById('page-game').classList.add('active');
+  document.getElementById('game-board-container').classList.add('active');
+  buildBoard(); updateGameUI(); showMessage(t('game_started'), 'success');
+  setTimeout(() => askTurnQuestion(), 1000);
+}
+
+function buildBoard() {
+  const board = document.getElementById('game-board'); board.innerHTML = '';
+  for (let i = 0; i < gameState.boardSize; i++) {
+    const cell = document.createElement('div'); cell.className = 'cell'; cell.id = 'cell-' + i;
+    let cellType = '', cellIcon = '';
+    if (i === 0) { cellType = 'start'; cellIcon = '🏁'; }
+    else if (i === gameState.boardSize - 1) { cellType = 'finish'; cellIcon = '🏆'; }
+    else if (i % 7 === 0) { cellType = 'question'; cellIcon = '?'; }
+    else if (i % 5 === 0) { cellType = 'bonus'; cellIcon = '↑'; }
+    else if (i % 9 === 0) { cellType = 'penalty'; cellIcon = '↓'; }
+    else { cellIcon = (i + 1).toString(); }
+    if (cellType) cell.classList.add(cellType);
+    cell.innerHTML = `<span class="cell-number">${i+1}</span><span class="cell-icon">${cellIcon}</span>`;
+    board.appendChild(cell);
+  }
+  renderPlayerTokens();
+}
+
+function renderPlayerTokens() {
+  document.querySelectorAll('.player-token').forEach(t => t.remove());
+  gameState.players.forEach((player, pi) => {
+    const cell = document.getElementById('cell-' + player.position);
+    if (cell) {
+      const token = document.createElement('div'); token.className = 'player-token'; token.style.background = player.color;
+      if (player.avatar && player.type === 'human') token.innerHTML = `<img src="${player.avatar}">`;
+      else token.textContent = player.type === 'bot' ? '🤖' : player.name[0].toUpperCase();
+      token.style.left = `calc(50% + ${(pi - gameState.players.length/2 + 0.5) * 30}px)`;
+      token.style.bottom = '5px';
+      cell.appendChild(token);
+    }
+  });
+}
+
+function updateGameUI() {
+  const player = gameState.players[gameState.currentPlayerIndex];
+  document.getElementById('current-player-name').textContent = player.name;
+  document.getElementById('players-panel').innerHTML = gameState.players.map((p, i) => `
+    <div class="player-card-game ${i === gameState.currentPlayerIndex ? 'active-turn' : ''}">
+      <div class="p-name">
+        ${p.avatar && p.type === 'human' ? `<div class="p-avatar"><img src="${p.avatar}"></div>` : `<div class="p-avatar" style="background:${p.color}; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">${p.type === 'bot' ? '🤖' : p.name[0].toUpperCase()}</div>`}
+        ${p.name} ${p.type === 'bot' ? `(${t('bot')})` : ''}
+      </div>
+      <div class="p-position">${t('position')}: ${p.position + 1}</div>
+    </div>
+  `).join('');
+  renderPlayerTokens();
+}
+
+function getUnusedQuestion() {
+  const availableSections = appState.completedSections;
+  const allQuestions = [];
+  availableSections.forEach(sectionIndex => {
+    sections[sectionIndex].quiz.forEach((q, qIndex) => {
+      const questionId = `${sectionIndex}-${qIndex}`;
+      if (!usedQuestions.has(questionId)) allQuestions.push({ question: q, sectionIndex, questionId });
+    });
+  });
+  if (allQuestions.length === 0) {
+    usedQuestions.clear();
+    availableSections.forEach(sectionIndex => {
+      sections[sectionIndex].quiz.forEach((q, qIndex) => allQuestions.push({ question: q, sectionIndex, questionId: `${sectionIndex}-${qIndex}` }));
+    });
+  }
+  return allQuestions[Math.floor(Math.random() * allQuestions.length)];
+}
+
+function askTurnQuestion() {
+  if (gameState.gameOver) return;
+  const player = gameState.players[gameState.currentPlayerIndex];
+  const { question: q, sectionIndex, questionId } = getUnusedQuestion();
+  
+  document.getElementById('modal-body').innerHTML = `
+    <h2 style="color:var(--green-dark); margin-bottom:10px;">${t('question_for')} ${player.name}</h2>
+    <p style="color:var(--text-light); margin-bottom:20px;">${sections[sectionIndex].title[currentLang]}</p>
+    <div class="quiz-question">${q.question[currentLang]}</div>
+    <div class="quiz-options">
+      ${q.options[currentLang].map((opt, i) => `<button class="quiz-option" onclick="answerTurnQuestion(${i}, ${q.correct}, '${questionId}')">${opt}</button>`).join('')}
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('active');
+  
+  if (player.type === 'bot') {
+    setTimeout(() => {
+      const botCorrect = Math.random() < 0.65;
+      const correctIndex = q.correct;
+      const buttons = document.querySelectorAll('#modal-body .quiz-option');
+      buttons.forEach(btn => btn.disabled = true);
+      if (buttons[correctIndex]) buttons[correctIndex].classList.add('correct');
+      if (!botCorrect) {
+        const wrongOptions = q.options[currentLang].map((_, i) => i).filter(i => i !== correctIndex);
+        buttons[wrongOptions[Math.floor(Math.random() * wrongOptions.length)]].classList.add('wrong');
+      }
+      setTimeout(() => { closeModal(); processTurnAnswer(botCorrect, player, questionId); }, 1500);
+    }, 1500);
+  }
+}
+
+function answerTurnQuestion(selected, correct, questionId) {
+  const buttons = document.querySelectorAll('#modal-body .quiz-option');
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === correct) btn.classList.add('correct');
+    else if (i === selected) btn.classList.add('wrong');
+  });
+  setTimeout(() => { closeModal(); processTurnAnswer(selected === correct, gameState.players[gameState.currentPlayerIndex], questionId); }, 1200);
+}
+
+function processTurnAnswer(isCorrect, player, questionId) {
+  if (questionId) usedQuestions.add(questionId);
+  saveGameState();
+  if (isCorrect) {
+    showMessage(`${player.name} ${t('correct_answer')}`, 'success');
+    gameState.canRollDice = true; saveGameState();
+    document.getElementById('dice').classList.remove('disabled');
+    document.getElementById('dice-label').textContent = t('roll_dice');
+    if (player.type === 'bot') setTimeout(() => rollDice(), 1000);
+  } else {
+    showMessage(`${player.name} ${t('wrong_answer')}`, 'error');
+    setTimeout(() => nextTurn(), 2000);
+  }
+}
+
+function rollDice() {
+  if (!gameState.canRollDice || gameState.isRolling) return;
+  gameState.isRolling = true; gameState.canRollDice = false; saveGameState();
+  
+  const dice = document.getElementById('dice'), diceLabel = document.getElementById('dice-label');
+  dice.classList.add('rolling', 'disabled'); diceLabel.textContent = t('rolling');
+  
+  let rollCount = 0;
+  const rollInterval = setInterval(() => { dice.textContent = Math.floor(Math.random() * 6) + 1; rollCount++; }, 80);
+  
+  setTimeout(() => {
+    clearInterval(rollInterval);
+    const result = Math.floor(Math.random() * 6) + 1;
+    dice.textContent = result; dice.classList.remove('rolling');
+    diceLabel.textContent = `${t('rolled')}: ${result}`;
+    setTimeout(() => processMove(result), 1000);
+  }, 800);
+}
+
+function processMove(diceValue) {
+  const player = gameState.players[gameState.currentPlayerIndex];
+  const newPos = player.position + diceValue;
+  if (newPos >= gameState.boardSize - 1) {
+    player.position = gameState.boardSize - 1; gameState.gameOver = true;
+    renderPlayerTokens(); updateGameUI();
+    showMessage(`${player.name} ${t('won')}!`, 'success');
+    appState.stats.gamesPlayed++; saveState(); clearGameSession();
+    setTimeout(() => { alert(`${player.name} ${t('won')}`); quitGame(); }, 2000);
+    return;
+  }
+  player.position = newPos; renderPlayerTokens(); updateGameUI(); saveGameState();
+  
+  const cellType = newPos % 7 === 0 ? 'question' : (newPos % 5 === 0 ? 'bonus' : (newPos % 9 === 0 ? 'penalty' : 'normal'));
+  setTimeout(() => {
+    if (cellType === 'bonus') {
+      showMessage(t('bonus'), 'success');
+      gameState.canRollDice = true; document.getElementById('dice').classList.remove('disabled');
+      document.getElementById('dice-label').textContent = t('roll_again');
+      saveGameState();
+      if (player.type === 'bot') setTimeout(() => rollDice(), 1000);
+    } else if (cellType === 'penalty') {
+      player.position = Math.max(0, player.position - 2);
+      showMessage(t('penalty'), 'error'); renderPlayerTokens(); saveGameState();
+      setTimeout(() => nextTurn(), 1500);
+    } else { setTimeout(() => nextTurn(), 1000); }
+  }, 500);
+}
+
+function nextTurn() {
+  gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+  gameState.isRolling = false; gameState.canRollDice = false; saveGameState();
+  document.getElementById('dice').classList.add('disabled');
+  document.getElementById('dice-label').textContent = t('answer_first');
+  updateGameUI();
+  setTimeout(() => askTurnQuestion(), 1000);
+}
+
+function quitGame() {
+  if (confirm(t('quit_confirm'))) {
+    clearGameSession(); showPage('lobby');
+    document.getElementById('game-board-container').classList.remove('active');
+  }
+}
+
+function showMessage(text, type) {
+  const msg = document.getElementById('game-message');
+  msg.textContent = text; msg.className = 'game-message show ' + type;
+  setTimeout(() => msg.classList.remove('show'), 3000);
+}
+
+createBubbles();
+loadState();
+</script>
+</body>
+</html>
